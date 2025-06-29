@@ -3,7 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { adminService } from '../../services/AdminService';
 import { roleService } from '../../services/RoleService';
-import AdminHeader from './AdminHeader';
+import AdminLayout from './AdminLayout';
 
 function AdminRoute({ children, requiredLevel = 1, requiredPermission = null }) {
   const { user, isAuthenticated, loading } = useAuth();
@@ -53,10 +53,9 @@ function AdminRoute({ children, requiredLevel = 1, requiredPermission = null }) 
   const level = adminService.getAccessLevel(planId);
 
   return (
-    <>
-      <AdminHeader level={level} />
+    <AdminLayout level={level}>
       {children}
-    </>
+    </AdminLayout>
   );
 }
 

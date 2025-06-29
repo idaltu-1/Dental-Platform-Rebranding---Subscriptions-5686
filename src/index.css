@@ -19,6 +19,10 @@ body.admin-mode {
   background: linear-gradient(to bottom right, #ebf8ff, #ffffff, #e0e7ff);
 }
 
+body.admin-red {
+  background: linear-gradient(to bottom right, #fee2e2, #fef2f2);
+}
+
 #root {
   width: 100%;
   height: 100%;
