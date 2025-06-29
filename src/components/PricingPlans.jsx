@@ -17,7 +17,7 @@ function PricingPlans() {
       name: 'starter',
       displayName: 'Starter',
       icon: FiCreditCard,
-      amount: 29,
+      amount: 49,
       priceId: 'price_1RemJgEWGT02FQpC9UZ3PNXp',
       paymentLink: 'https://buy.stripe.com/9B6eVd7OU32m9sk4sXao801',
       currency: 'usd',
@@ -38,7 +38,7 @@ function PricingPlans() {
       name: 'professional',
       displayName: 'Professional',
       icon: FiStar,
-      amount: 79,
+      amount: 99,
       priceId: 'price_1RemJgEWGT02FQpCn8yAw9DE',
       paymentLink: 'https://buy.stripe.com/dRm14nd9eauOdIA3oTao803',
       currency: 'usd',
@@ -78,6 +78,25 @@ function PricingPlans() {
         'Dedicated account manager'
       ],
       color: 'from-green-600 to-emerald-600',
+      popular: false
+    },
+    {
+      id: 'celestial',
+      name: 'celestial',
+      displayName: 'Celestial',
+      icon: FiStar,
+      amount: 999999,
+      priceId: 'price_celestial_year',
+      paymentLink: 'https://buy.stripe.com/celestial',
+      currency: 'usd',
+      interval: 'year',
+      description: 'For practices beyond this world',
+      features: [
+        'All Enterprise features',
+        'Unlimited storage',
+        'Dedicated success manager'
+      ],
+      color: 'from-yellow-600 to-yellow-700',
       popular: false
     }
   ];
