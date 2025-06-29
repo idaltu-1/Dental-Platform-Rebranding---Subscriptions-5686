@@ -1,4 +1,5 @@
 import express from 'express';
+import { clearPermissionCache } from '../middleware/checkAdminAccess.js';
 const router = express.Router();
 
 router.post('/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
@@ -8,8 +9,8 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
     case 'invoice.paid':
     case 'customer.subscription.updated':
     case 'customer.subscription.deleted':
-      // TODO: update permission cache or user session
       console.log('Received event', event.type);
+      clearPermissionCache();
       break;
     default:
       console.log('Unhandled event', event.type);

@@ -11,6 +11,10 @@ async function loadPermissions() {
   return permissionsCache;
 }
 
+export function clearPermissionCache() {
+  permissionsCache = null;
+}
+
 export function checkAdminAccess(requiredLevel = 1) {
   return async function(req, res, next) {
     const perms = await loadPermissions();
