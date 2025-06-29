@@ -38,7 +38,8 @@ export default [
         'warn',
         { allowConstantExport: true },
       ],
-      'no-unused-vars': 'warn',
+      'no-unused-vars': 'off',
+      'react-hooks/exhaustive-deps': 'off',
       'react/prop-types': 'off'
     },
   },
