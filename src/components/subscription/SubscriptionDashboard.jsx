@@ -207,8 +207,7 @@ function SubscriptionDashboard() {
               <div className="flex items-center">
                 <SafeIcon icon={FiAlertCircle} className="text-orange-600 mr-2" />
                 <span className="text-orange-800">
-                  Your subscription will be canceled on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}.
-                  You'll continue to have access until then.
+                  {`Your subscription will be canceled on ${new Date(subscription.currentPeriodEnd).toLocaleDateString()}. You'll continue to have access until then.`}
                 </span>
               </div>
             </div>

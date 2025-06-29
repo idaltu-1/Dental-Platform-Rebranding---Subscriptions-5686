@@ -11,6 +11,7 @@ function PlanCard({ plan, isCurrentPlan, onUpgrade, delay = 0 }) {
       case 'starter': return FiShield;
       case 'professional': return FiStar;
       case 'enterprise': return FiTrendingUp;
+      case 'celestial': return FiStar;
       default: return FiShield;
     }
   };
@@ -20,6 +21,7 @@ function PlanCard({ plan, isCurrentPlan, onUpgrade, delay = 0 }) {
       case 'starter': return 'from-blue-500 to-blue-600';
       case 'professional': return 'from-purple-500 to-purple-600';
       case 'enterprise': return 'from-green-500 to-green-600';
+      case 'celestial': return 'from-yellow-600 to-yellow-700';
       default: return 'from-gray-500 to-gray-600';
     }
   };

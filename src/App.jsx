@@ -19,6 +19,8 @@ import OnboardingWizard from './components/onboarding/OnboardingWizard';
 import PricingPlans from './components/PricingPlans';
 import SubscriptionDashboard from './components/subscription/SubscriptionDashboard';
 import ProfileScreen from './components/ProfileScreen';
+import AdminRoute from './components/admin/AdminRoute';
+import useAdminFavicon from './hooks/useAdminFavicon';
 
 // New screens to implement
 import ReferralTracking from './components/referrals/ReferralTracking';
@@ -36,6 +38,7 @@ import HelpScreen from './components/help/HelpScreen';
 import FeedbackProvider from './components/feedback/FeedbackProvider';
 
 function App() {
+  useAdminFavicon();
   return (
     <AuthProvider>
       <FeedbackProvider>
@@ -186,19 +189,43 @@ function App() {
               </Route>
 
               {/* Admin Routes */}
-              <Route 
-                path="/admin/*" 
+              <Route
+                path="/admin/*"
                 element={
-                  <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+                  <AdminRoute requiredLevel={1}>
                     <DashboardLayout />
-                  </ProtectedRoute>
+                  </AdminRoute>
                 }
               >
                 <Route path="dashboard" element={<Dashboard />} />
-                <Route path="users" element={<PatientManagement />} />
-                <Route path="analytics" element={<AnalyticsScreen />} />
-                <Route path="integrations" element={<CustomIntegrations />} />
-                <Route path="subscription" element={<SubscriptionDashboard />} />
+                <Route
+                  path="users"
+                  element={
+                    <AdminRoute requiredLevel={2} requiredPermission="user_management">
+                      <PatientManagement />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="analytics"
+                  element={
+                    <AdminRoute requiredLevel={1} requiredPermission="analytics">
+                      <AnalyticsScreen />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="integrations"
+                  element={
+                    <AdminRoute requiredLevel={2}>
+                      <CustomIntegrations />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="subscription"
+                  element={<AdminRoute requiredLevel={1}><SubscriptionDashboard /></AdminRoute>}
+                />
               </Route>
 
               {/* Unauthorized Route */}
@@ -208,7 +235,7 @@ function App() {
                   <div className="min-h-screen flex items-center justify-center">
                     <div className="text-center">
                       <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-                      <p className="text-gray-600">You don't have permission to access this page.</p>
+                      <p className="text-gray-600">{'You don\'t have permission to access this page.'}</p>
                     </div>
                   </div>
                 } 
@@ -221,7 +248,7 @@ function App() {
                   <div className="min-h-screen flex items-center justify-center">
                     <div className="text-center">
                       <h1 className="text-2xl font-bold text-gray-900 mb-4">Page Not Found</h1>
-                      <p className="text-gray-600">The page you're looking for doesn't exist.</p>
+                      <p className="text-gray-600">{'The page you\'re looking for doesn\'t exist.'}</p>
                     </div>
                   </div>
                 } 
