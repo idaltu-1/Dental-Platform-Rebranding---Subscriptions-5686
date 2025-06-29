@@ -1,7 +1,7 @@
 // Simple encryption service without crypto-js dependency
 class EncryptionService {
   constructor() {
-    this.secretKey = process.env.REACT_APP_ENCRYPTION_KEY || 'default-key-for-development';
+    this.secretKey = import.meta.env.VITE_REACT_APP_ENCRYPTION_KEY || 'default-key-for-development';
   }
 
   async encrypt(text) {
