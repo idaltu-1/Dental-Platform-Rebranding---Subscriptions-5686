@@ -3,7 +3,7 @@ import { encryptionService } from './EncryptionService';
 
 class AuthService {
   constructor() {
-    this.apiUrl = process.env.REACT_APP_API_URL || 'https://api.refer.dental';
+    this.apiUrl = import.meta.env.VITE_REACT_APP_API_URL || 'https://api.refer.dental';
     this.mockUsers = this.initializeMockUsers();
   }
 
