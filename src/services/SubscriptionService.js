@@ -6,7 +6,7 @@ class SubscriptionService {
         id: 'starter',
         name: 'Starter',
         displayName: 'Starter Plan',
-        amount: 29,
+        amount: 49,
         currency: 'usd',
         interval: 'month',
         features: [
@@ -29,7 +29,7 @@ class SubscriptionService {
         id: 'professional',
         name: 'professional',
         displayName: 'Professional Plan',
-        amount: 79,
+        amount: 99,
         currency: 'usd',
         interval: 'month',
         features: [
@@ -75,6 +75,28 @@ class SubscriptionService {
         },
         stripeProductId: 'prod_enterprise',
         stripePriceId: 'price_1RemJgEWGT02FQpCJZSuLumG'
+      },
+      {
+        id: 'celestial',
+        name: 'celestial',
+        displayName: 'Celestial Plan',
+        amount: 999999,
+        currency: 'usd',
+        interval: 'year',
+        features: [
+          'Unlimited everything',
+          'Priority 24/7 support',
+          'Dedicated success manager',
+          'Custom integrations'
+        ],
+        limits: {
+          patients: -1,
+          referrals: -1,
+          storage: '1TB',
+          users: -1
+        },
+        stripeProductId: 'prod_celestial',
+        stripePriceId: 'price_celestial_year'
       }
     ];
   }
@@ -388,12 +410,12 @@ class SubscriptionService {
 
   // Helper methods for plan comparisons
   isPlanUpgrade(currentPlanId, newPlanId) {
-    const planHierarchy = { starter: 1, professional: 2, enterprise: 3 };
+    const planHierarchy = { starter: 1, professional: 2, enterprise: 3, celestial: 4 };
     return planHierarchy[newPlanId] > planHierarchy[currentPlanId];
   }
 
   isPlanDowngrade(currentPlanId, newPlanId) {
-    const planHierarchy = { starter: 1, professional: 2, enterprise: 3 };
+    const planHierarchy = { starter: 1, professional: 2, enterprise: 3, celestial: 4 };
     return planHierarchy[newPlanId] < planHierarchy[currentPlanId];
   }
 

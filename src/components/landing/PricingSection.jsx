@@ -16,7 +16,7 @@ function PricingSection() {
       name: 'Starter',
       icon: FiShield,
       popular: false,
-      price: { monthly: 29, yearly: 290 },
+      price: { monthly: 49, yearly: 499 },
       description: 'Perfect for small dental practices',
       features: [
         'Up to 100 patients',
@@ -35,7 +35,7 @@ function PricingSection() {
       name: 'Professional',
       icon: FiStar,
       popular: true,
-      price: { monthly: 79, yearly: 790 },
+      price: { monthly: 99, yearly: 999 },
       description: 'Most popular choice for growing practices',
       features: [
         'Unlimited patients',
@@ -56,7 +56,7 @@ function PricingSection() {
       name: 'Enterprise',
       icon: FiTrendingUp,
       popular: false,
-      price: { monthly: 499, yearly: 4990 },
+      price: { monthly: 499, yearly: 4999 },
       description: 'Complete solution for large practices',
       features: [
         'Multi-location support',
@@ -72,6 +72,21 @@ function PricingSection() {
       ],
       gradient: 'from-green-600 to-emerald-600',
       paymentLink: 'https://buy.stripe.com/9B6aEX7OU46qfQIgbFao802'
+    },
+    {
+      id: 'celestial',
+      name: 'Celestial',
+      icon: FiStar,
+      popular: false,
+      price: { monthly: null, yearly: 999999 },
+      description: 'For practices beyond this world',
+      features: [
+        'All Enterprise features',
+        'Unlimited storage',
+        'Dedicated success manager'
+      ],
+      gradient: 'from-yellow-600 to-yellow-700',
+      paymentLink: 'https://buy.stripe.com/celestial'
     }
   ];
 

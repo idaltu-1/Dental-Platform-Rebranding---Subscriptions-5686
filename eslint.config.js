@@ -8,10 +8,12 @@ export default [
   { ignores: ['dist'] },
   {
     files: ['**/*.{js,jsx}'],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-      parserOptions: {
+      languageOptions: {
+        ecmaVersion: 2020,
+        globals: Object.fromEntries(
+          Object.entries(globals.browser).map(([key, value]) => [key.trim(), value])
+        ),
+        parserOptions: {
         ecmaVersion: 'latest',
         ecmaFeatures: { jsx: true },
         sourceType: 'module',
