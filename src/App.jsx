@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import {HashRouter as Router, Routes, Route, useLocation} from 'react-router-dom';
+import React from 'react';
+import {HashRouter as Router, Routes, Route} from 'react-router-dom';
 import {Toaster} from 'react-hot-toast';
 import {AuthProvider} from './contexts/AuthContext';
 import '@questlabs/react-sdk/dist/style.css';
@@ -19,21 +19,8 @@ import OnboardingWizard from './components/onboarding/OnboardingWizard';
 import PricingPlans from './components/PricingPlans';
 import SubscriptionDashboard from './components/subscription/SubscriptionDashboard';
 import ProfileScreen from './components/ProfileScreen';
-import adminFavicon from './assets/admin-favicon.svg';
-
-function RouteFaviconManager() {
-  const location = useLocation();
-  useEffect(() => {
-    const favicon = document.getElementById('favicon');
-    if (!favicon) return;
-    if (location.pathname.startsWith('/admin')) {
-      favicon.setAttribute('href', adminFavicon);
-    } else {
-      favicon.setAttribute('href', '/vite.svg');
-    }
-  }, [location]);
-  return null;
-}
+import AdminRoute from './components/admin/AdminRoute';
+import useAdminFavicon from './hooks/useAdminFavicon';
 
 // New screens to implement
 import ReferralTracking from './components/referrals/ReferralTracking';
@@ -52,11 +39,11 @@ import FeedbackProvider from './components/feedback/FeedbackProvider';
 import FeedbackButton from './components/feedback/FeedbackButton';
 
 function App() {
+  useAdminFavicon();
   return (
     <AuthProvider>
       <FeedbackProvider>
         <Router>
-          <RouteFaviconManager />
           <div className="min-h-screen">
             <Routes>
               {/* Public Routes */}
@@ -206,37 +193,40 @@ function App() {
               <Route
                 path="/admin/*"
                 element={
-                  <ProtectedRoute requiredRole={['admin', 'super_admin']} requiredPlan="starter">
+                  <AdminRoute requiredLevel={1}>
                     <DashboardLayout />
-                  </ProtectedRoute>
+                  </AdminRoute>
                 }
               >
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route
                   path="users"
                   element={
-                    <ProtectedRoute requiredPlan="professional">
+                    <AdminRoute requiredLevel={2} requiredPermission="user_management">
                       <PatientManagement />
-                    </ProtectedRoute>
+                    </AdminRoute>
                   }
                 />
                 <Route
                   path="analytics"
                   element={
-                    <ProtectedRoute requiredPlan="enterprise" requiredPermission="analytics">
+                    <AdminRoute requiredLevel={1} requiredPermission="analytics">
                       <AnalyticsScreen />
-                    </ProtectedRoute>
+                    </AdminRoute>
                   }
                 />
                 <Route
                   path="integrations"
                   element={
-                    <ProtectedRoute requiredPlan="enterprise">
+                    <AdminRoute requiredLevel={2}>
                       <CustomIntegrations />
-                    </ProtectedRoute>
+                    </AdminRoute>
                   }
                 />
-                <Route path="subscription" element={<SubscriptionDashboard />} />
+                <Route
+                  path="subscription"
+                  element={<AdminRoute requiredLevel={1}><SubscriptionDashboard /></AdminRoute>}
+                />
               </Route>
 
               {/* Unauthorized Route */}

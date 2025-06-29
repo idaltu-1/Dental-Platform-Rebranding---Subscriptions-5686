@@ -3,6 +3,14 @@ class StripeService {
     this.stripePublicKey = process.env.REACT_APP_STRIPE_PUBLIC_KEY;
     this.plans = [
       {
+        name: 'trial',
+        amount: 1,
+        priceId: 'price_trial_month',
+        paymentLink: 'https://buy.stripe.com/trial',
+        currency: 'usd',
+        interval: 'month'
+      },
+      {
         name: 'starter',
         amount: 49,
         priceId: 'price_1RemJgEWGT02FQpC9UZ3PNXp',

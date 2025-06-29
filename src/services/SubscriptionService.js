@@ -1,8 +1,28 @@
 class SubscriptionService {
   constructor() {
     this.subscriptions = this.initializeMockData();
-    this.planHierarchy = { starter: 1, professional: 2, enterprise: 3, celestial: 4 };
+    this.planHierarchy = { trial: 0, starter: 1, professional: 2, enterprise: 3, celestial: 4 };
     this.plans = [
+      {
+        id: 'trial',
+        name: 'trial',
+        displayName: 'Trial Plan',
+        amount: 1,
+        currency: 'usd',
+        interval: 'month',
+        features: [
+          'Limited access',
+          'Community support'
+        ],
+        limits: {
+          patients: 10,
+          referrals: 5,
+          storage: '500MB',
+          users: 1
+        },
+        stripeProductId: 'prod_trial',
+        stripePriceId: 'price_trial_month'
+      },
       {
         id: 'starter',
         name: 'Starter',
