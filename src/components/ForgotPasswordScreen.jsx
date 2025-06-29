@@ -86,14 +86,14 @@ function ForgotPasswordScreen() {
             <h1 className="text-2xl font-bold text-gray-900 mb-4">
               Check Your Email
             </h1>
-            <p className="text-gray-600 mb-2">
-              We've sent password reset instructions to:
-            </p>
+              <p className="text-gray-600 mb-2">
+                We&apos;ve sent password reset instructions to:
+              </p>
             <p className="text-blue-600 font-semibold mb-6">
               {email}
             </p>
             <p className="text-sm text-gray-500 mb-8">
-              If you don't see the email, check your spam folder or try again with a different email address.
+              {"If you don't see the email, check your spam folder or try again with a different email address."}
             </p>
 
             {/* Action Buttons */}
@@ -158,9 +158,9 @@ function ForgotPasswordScreen() {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               Forgot Password?
             </h2>
-            <p className="text-gray-600">
-              Enter your email address and we'll send you instructions to reset your password.
-            </p>
+              <p className="text-gray-600">
+                Enter your email address and we&apos;ll send you instructions to reset your password.
+              </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -240,8 +240,8 @@ function ForgotPasswordScreen() {
           className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6"
         >
           <p className="text-sm text-blue-800">
-            <strong>Security Notice:</strong> Password reset links expire after 24 hours for your security. 
-            If you don't receive an email within a few minutes, please check your spam folder.
+            <strong>Security Notice:</strong> Password reset links expire after 24 hours for your security.
+            {"If you don't receive an email within a few minutes, please check your spam folder."}
           </p>
         </motion.div>
 

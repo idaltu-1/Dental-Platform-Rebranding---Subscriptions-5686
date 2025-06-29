@@ -24,7 +24,7 @@ function HeroSection() {
   ];
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800">
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 pt-32 sm:pt-40">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
@@ -101,7 +101,7 @@ function HeroSection() {
               </p>
 
               {/* Benefits List */}
-              <div className="grid grid-cols-2 gap-3 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
                 {benefits.map((benefit, index) => (
                   <motion.div
                     key={benefit}
@@ -163,7 +163,7 @@ function HeroSection() {
           </div>
 
           {/* Right Content - Stats & Visual */}
-          <div className="relative">
+          <div className="relative hidden md:block">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}

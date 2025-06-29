@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../../common/SafeIcon';
+import Logo from '../../assets/logo.svg';
 
-const { FiActivity, FiMenu, FiX, FiLogIn, FiUserPlus } = FiIcons;
+const { FiMenu, FiX, FiLogIn, FiUserPlus } = FiIcons;
 
 function LandingHeader() {
   const navigate = useNavigate();
@@ -54,13 +55,9 @@ function LandingHeader() {
             className="flex items-center space-x-3 cursor-pointer"
             onClick={() => navigate('/')}
           >
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-xl">
-              <SafeIcon icon={FiActivity} className="text-white text-xl" />
-            </div>
+            <img src={Logo} alt="Refer Dental logo" className="h-8 w-8" />
             <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                refer.dental
-              </h1>
+              <h1 className="text-xl font-bold text-blue-700">refer.dental</h1>
               <p className="text-xs text-gray-500 hidden sm:block">Professional Platform</p>
             </div>
           </motion.div>
