@@ -1,6 +1,7 @@
 class SubscriptionService {
   constructor() {
     this.subscriptions = this.initializeMockData();
+    this.planHierarchy = { starter: 1, professional: 2, enterprise: 3, celestial: 4 };
     this.plans = [
       {
         id: 'starter',
@@ -408,15 +409,17 @@ class SubscriptionService {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  getPlanLevel(planId) {
+    return this.planHierarchy[planId] || 0;
+  }
+
   // Helper methods for plan comparisons
   isPlanUpgrade(currentPlanId, newPlanId) {
-    const planHierarchy = { starter: 1, professional: 2, enterprise: 3, celestial: 4 };
-    return planHierarchy[newPlanId] > planHierarchy[currentPlanId];
+    return this.getPlanLevel(newPlanId) > this.getPlanLevel(currentPlanId);
   }
 
   isPlanDowngrade(currentPlanId, newPlanId) {
-    const planHierarchy = { starter: 1, professional: 2, enterprise: 3, celestial: 4 };
-    return planHierarchy[newPlanId] < planHierarchy[currentPlanId];
+    return this.getPlanLevel(newPlanId) < this.getPlanLevel(currentPlanId);
   }
 
   calculateProration(currentPlan, newPlan, daysRemaining) {

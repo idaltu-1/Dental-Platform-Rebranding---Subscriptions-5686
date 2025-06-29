@@ -1,5 +1,5 @@
-import React from 'react';
-import {HashRouter as Router, Routes, Route} from 'react-router-dom';
+import React, { useEffect } from 'react';
+import {HashRouter as Router, Routes, Route, useLocation} from 'react-router-dom';
 import {Toaster} from 'react-hot-toast';
 import {AuthProvider} from './contexts/AuthContext';
 import '@questlabs/react-sdk/dist/style.css';
@@ -19,6 +19,21 @@ import OnboardingWizard from './components/onboarding/OnboardingWizard';
 import PricingPlans from './components/PricingPlans';
 import SubscriptionDashboard from './components/subscription/SubscriptionDashboard';
 import ProfileScreen from './components/ProfileScreen';
+import adminFavicon from './assets/admin-favicon.svg';
+
+function RouteFaviconManager() {
+  const location = useLocation();
+  useEffect(() => {
+    const favicon = document.getElementById('favicon');
+    if (!favicon) return;
+    if (location.pathname.startsWith('/admin')) {
+      favicon.setAttribute('href', adminFavicon);
+    } else {
+      favicon.setAttribute('href', '/vite.svg');
+    }
+  }, [location]);
+  return null;
+}
 
 // New screens to implement
 import ReferralTracking from './components/referrals/ReferralTracking';
@@ -41,6 +56,7 @@ function App() {
     <AuthProvider>
       <FeedbackProvider>
         <Router>
+          <RouteFaviconManager />
           <div className="min-h-screen">
             <Routes>
               {/* Public Routes */}
@@ -187,18 +203,39 @@ function App() {
               </Route>
 
               {/* Admin Routes */}
-              <Route 
-                path="/admin/*" 
+              <Route
+                path="/admin/*"
                 element={
-                  <ProtectedRoute requiredRole={['admin', 'super_admin']}>
+                  <ProtectedRoute requiredRole={['admin', 'super_admin']} requiredPlan="starter">
                     <DashboardLayout />
                   </ProtectedRoute>
                 }
               >
                 <Route path="dashboard" element={<Dashboard />} />
-                <Route path="users" element={<PatientManagement />} />
-                <Route path="analytics" element={<AnalyticsScreen />} />
-                <Route path="integrations" element={<CustomIntegrations />} />
+                <Route
+                  path="users"
+                  element={
+                    <ProtectedRoute requiredPlan="professional">
+                      <PatientManagement />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="analytics"
+                  element={
+                    <ProtectedRoute requiredPlan="enterprise" requiredPermission="analytics">
+                      <AnalyticsScreen />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="integrations"
+                  element={
+                    <ProtectedRoute requiredPlan="enterprise">
+                      <CustomIntegrations />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="subscription" element={<SubscriptionDashboard />} />
               </Route>
 
