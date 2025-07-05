@@ -3,8 +3,16 @@ class StripeService {
     this.stripePublicKey = process.env.REACT_APP_STRIPE_PUBLIC_KEY;
     this.plans = [
       {
+        name: 'trial',
+        amount: 1,
+        priceId: 'price_trial_month',
+        paymentLink: 'https://buy.stripe.com/trial',
+        currency: 'usd',
+        interval: 'month'
+      },
+      {
         name: 'starter',
-        amount: 29,
+        amount: 49,
         priceId: 'price_1RemJgEWGT02FQpC9UZ3PNXp',
         paymentLink: 'https://buy.stripe.com/9B6eVd7OU32m9sk4sXao801',
         currency: 'usd',
@@ -12,7 +20,7 @@ class StripeService {
       },
       {
         name: 'professional',
-        amount: 79,
+        amount: 99,
         priceId: 'price_1RemJgEWGT02FQpCn8yAw9DE',
         paymentLink: 'https://buy.stripe.com/dRm14nd9eauOdIA3oTao803',
         currency: 'usd',
@@ -25,6 +33,14 @@ class StripeService {
         paymentLink: 'https://buy.stripe.com/9B6aEX7OU46qfQIgbFao802',
         currency: 'usd',
         interval: 'month'
+      },
+      {
+        name: 'celestial',
+        amount: 999999,
+        priceId: 'price_celestial_year',
+        paymentLink: 'https://buy.stripe.com/celestial',
+        currency: 'usd',
+        interval: 'year'
       }
     ];
   }

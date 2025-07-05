@@ -122,7 +122,7 @@ function PlanUpgradeModal({ currentPlan, selectedPlan, subscription, onClose, on
 
           {/* Feature Comparison */}
           <div className="mb-6">
-            <h4 className="font-semibold text-gray-900 mb-3">What you'll get:</h4>
+            <h4 className="font-semibold text-gray-900 mb-3">{"What you'll get:"}</h4>
             <div className="space-y-2">
               {selectedPlan?.features.slice(0, 4).map((feature, index) => (
                 <div key={index} className="flex items-center text-sm">

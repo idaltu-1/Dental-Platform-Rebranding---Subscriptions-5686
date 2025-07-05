@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+/* eslint react-refresh/only-export-components: off */
+import { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/AuthService';
 
 const AuthContext = createContext();

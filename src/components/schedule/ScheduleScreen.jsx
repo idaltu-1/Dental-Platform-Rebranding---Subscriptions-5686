@@ -56,10 +56,11 @@ function ScheduleScreen() {
     switch (viewMode) {
       case 'day':
         return format(currentDate, 'EEEE, MMMM dd, yyyy');
-      case 'week':
-        const start = startOfWeek(currentDate);
-        const end = endOfWeek(currentDate);
-        return `${format(start, 'MMM dd')} - ${format(end, 'MMM dd, yyyy')}`;
+        case 'week': {
+          const start = startOfWeek(currentDate);
+          const end = endOfWeek(currentDate);
+          return `${format(start, 'MMM dd')} - ${format(end, 'MMM dd, yyyy')}`;
+        }
       case 'month':
         return format(currentDate, 'MMMM yyyy');
       default:

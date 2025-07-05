@@ -1,80 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../../common/SafeIcon';
+import { referralService } from '../../services/ReferralService';
+import ReferralCommunication from './ReferralCommunication';
+import ReferralTemplates from './ReferralTemplates';
 
-const { FiSearch, FiPlus, FiEye, FiEdit, FiClock, FiUser, FiMapPin, FiCalendar, FiX, FiPhone, FiMail } = FiIcons;
+const { FiSearch, FiPlus, FiEye, FiEdit, FiClock, FiUser, FiMapPin, FiCalendar, FiX, FiPhone, FiMail, FiMessageSquare, FiTemplate, FiBarChart3, FiPaperclip, FiCheckCircle, FiXCircle } = FiIcons;
 
 function ReferralTracking() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedReferral, setSelectedReferral] = useState(null);
   const [showNewReferral, setShowNewReferral] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [showCommunication, setShowCommunication] = useState(false);
+  const [referrals, setReferrals] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [newReferral, setNewReferral] = useState({
     patientName: '',
     patientEmail: '',
     patientPhone: '',
+    patientAddress: '',
     referringDoctor: '',
     specialist: '',
     type: '',
     urgency: 'normal',
     notes: '',
-    preferredDate: ''
+    symptoms: '',
+    preferredDate: '',
+    insurance: '',
+    medicalHistory: '',
+    medications: ''
   });
 
-  const referrals = [
-    {
-      id: 'REF-001',
-      patientName: 'John Smith',
-      patientEmail: 'john.smith@email.com',
-      patientPhone: '(555) 123-4567',
-      patientAddress: '123 Main St, Springfield, IL',
-      referringDoctor: 'Dr. Sarah Wilson',
-      specialist: 'Dr. Michael Chen',
-      type: 'Endodontics',
-      status: 'pending',
-      urgency: 'high',
-      date: '2024-01-15',
-      notes: 'Root canal evaluation needed. Patient experiencing severe pain.',
-      preferredDate: '2024-02-01',
-      insurance: 'Blue Cross Blue Shield',
-      symptoms: 'Severe tooth pain, sensitivity to cold'
-    },
-    {
-      id: 'REF-002',
-      patientName: 'Emma Davis',
-      patientEmail: 'emma.davis@email.com',
-      patientPhone: '(555) 987-6543',
-      patientAddress: '456 Oak Ave, Springfield, IL',
-      referringDoctor: 'Dr. Robert Taylor',
-      specialist: 'Dr. Lisa Anderson',
-      type: 'Oral Surgery',
-      status: 'accepted',
-      urgency: 'normal',
-      date: '2024-01-18',
-      notes: 'Wisdom tooth extraction required',
-      preferredDate: '2024-02-05',
-      insurance: 'Aetna',
-      symptoms: 'Impacted wisdom tooth causing discomfort'
-    },
-    {
-      id: 'REF-003',
-      patientName: 'Michael Wilson',
-      patientEmail: 'mike.wilson@email.com',
-      patientPhone: '(555) 456-7890',
-      patientAddress: '789 Pine St, Springfield, IL',
-      referringDoctor: 'Dr. Jennifer Brown',
-      specialist: 'Dr. David Lee',
-      type: 'Periodontics',
-      status: 'completed',
-      urgency: 'normal',
-      date: '2024-01-20',
-      notes: 'Gum disease treatment completed successfully',
-      preferredDate: '2024-01-25',
-      insurance: 'Cigna',
-      symptoms: 'Gum bleeding and recession'
+  useEffect(() => {
+    loadReferrals();
+  }, []);
+
+  const loadReferrals = async () => {
+    try {
+      setIsLoading(true);
+      const data = await referralService.getAllReferrals();
+      setReferrals(data);
+    } catch (error) {
+      console.error('Failed to load referrals:', error);
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
 
   const specialtyOptions = [
     'Endodontics',
@@ -123,25 +97,52 @@ function ReferralTracking() {
     setShowNewReferral(true);
   };
 
-  const handleSaveReferral = () => {
-    console.log('Save new referral:', newReferral);
-    setShowNewReferral(false);
-    setNewReferral({
-      patientName: '',
-      patientEmail: '',
-      patientPhone: '',
-      referringDoctor: '',
-      specialist: '',
-      type: '',
-      urgency: 'normal',
-      notes: '',
-      preferredDate: ''
-    });
+  const handleSaveReferral = async () => {
+    try {
+      const newReferralData = await referralService.createReferral(newReferral);
+      setReferrals(prev => [newReferralData, ...prev]);
+      setShowNewReferral(false);
+      setNewReferral({
+        patientName: '',
+        patientEmail: '',
+        patientPhone: '',
+        patientAddress: '',
+        referringDoctor: '',
+        specialist: '',
+        type: '',
+        urgency: 'normal',
+        notes: '',
+        symptoms: '',
+        preferredDate: '',
+        insurance: '',
+        medicalHistory: '',
+        medications: ''
+      });
+    } catch (error) {
+      console.error('Failed to save referral:', error);
+    }
   };
 
-  const handleUpdateStatus = (referralId, newStatus) => {
-    console.log('Update status:', referralId, newStatus);
-    // Implement status update logic
+  const handleUpdateStatus = async (referralId, newStatus) => {
+    try {
+      const updatedReferral = await referralService.updateReferralStatus(referralId, newStatus);
+      setReferrals(prev => prev.map(r => r.id === referralId ? updatedReferral : r));
+      if (selectedReferral && selectedReferral.id === referralId) {
+        setSelectedReferral(updatedReferral);
+      }
+    } catch (error) {
+      console.error('Failed to update status:', error);
+    }
+  };
+
+  const handleTemplateSelected = (newReferral) => {
+    setReferrals(prev => [newReferral, ...prev]);
+    setShowTemplates(false);
+  };
+
+  const handleCommunication = (referral) => {
+    setSelectedReferral(referral);
+    setShowCommunication(true);
   };
 
   return (
@@ -155,13 +156,22 @@ function ReferralTracking() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Referral Tracking</h1>
           <p className="text-gray-600">Manage and track patient referrals</p>
         </div>
-        <button
-          onClick={handleNewReferral}
-          className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-semibold flex items-center space-x-2 hover:shadow-lg transition-all"
-        >
-          <SafeIcon icon={FiPlus} />
-          <span>New Referral</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => setShowTemplates(true)}
+            className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-semibold flex items-center space-x-2 hover:shadow-lg transition-all"
+          >
+            <SafeIcon icon={FiTemplate} />
+            <span>Templates</span>
+          </button>
+          <button
+            onClick={handleNewReferral}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-semibold flex items-center space-x-2 hover:shadow-lg transition-all"
+          >
+            <SafeIcon icon={FiPlus} />
+            <span>New Referral</span>
+          </button>
+        </div>
       </motion.div>
 
       {/* Stats Cards */}
@@ -284,84 +294,124 @@ function ReferralTracking() {
         transition={{ delay: 0.6 }}
         className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden"
       >
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Referral ID</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Patient</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Referring Doctor</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Specialist</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Type</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Urgency</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filteredReferrals.map((referral) => (
-                <tr key={referral.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    {referral.id}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm mr-3">
-                        {referral.patientName.split(' ').map(n => n[0]).join('')}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">{referral.patientName}</p>
-                        <p className="text-sm text-gray-600">{referral.patientPhone}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{referral.referringDoctor}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{referral.specialist}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{referral.type}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(referral.status)}`}>
-                      {referral.status.charAt(0).toUpperCase() + referral.status.slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`font-semibold ${getUrgencyColor(referral.urgency)}`}>
-                      {referral.urgency.charAt(0).toUpperCase() + referral.urgency.slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleViewReferral(referral)}
-                        className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                        title="View Details"
-                      >
-                        <SafeIcon icon={FiEye} />
-                      </button>
-                      <button
-                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Edit Referral"
-                      >
-                        <SafeIcon icon={FiEdit} />
-                      </button>
-                    </div>
-                  </td>
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading referrals...</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Referral ID</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Patient</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Referring Doctor</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Specialist</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Type</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Urgency</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Communications</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredReferrals.map((referral) => (
+                  <tr key={referral.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                      {referral.id}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm mr-3">
+                          {referral.patientName.split(' ').map(n => n[0]).join('')}
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{referral.patientName}</p>
+                          <p className="text-sm text-gray-600">{referral.patientPhone}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{referral.referringDoctor}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{referral.specialist}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{referral.type}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(referral.status)}`}>
+                        {referral.status.charAt(0).toUpperCase() + referral.status.slice(1)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`font-semibold ${getUrgencyColor(referral.urgency)}`}>
+                        {referral.urgency.charAt(0).toUpperCase() + referral.urgency.slice(1)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleCommunication(referral)}
+                          className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors relative"
+                          title="Communications"
+                        >
+                          <SafeIcon icon={FiMessageSquare} />
+                          {referral.communicationCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                              {referral.communicationCount}
+                            </span>
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleViewReferral(referral)}
+                          className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                          title="View Details"
+                        >
+                          <SafeIcon icon={FiEye} />
+                        </button>
+                        <button
+                          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                          title="Edit Referral"
+                        >
+                          <SafeIcon icon={FiEdit} />
+                        </button>
+                        {referral.attachments && referral.attachments.length > 0 && (
+                          <button
+                            className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                            title="Attachments"
+                          >
+                            <SafeIcon icon={FiPaperclip} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-        {filteredReferrals.length === 0 && (
+        {!isLoading && filteredReferrals.length === 0 && (
           <div className="text-center py-12">
             <SafeIcon icon={FiUser} className="text-gray-300 text-4xl mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No referrals found</h3>
             <p className="text-gray-600 mb-4">Try adjusting your search or filter criteria</p>
-            <button
-              onClick={handleNewReferral}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              Create First Referral
-            </button>
+            <div className="flex items-center justify-center space-x-3">
+              <button
+                onClick={() => setShowTemplates(true)}
+                className="bg-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+              >
+                Use Template
+              </button>
+              <button
+                onClick={handleNewReferral}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              >
+                Create First Referral
+              </button>
+            </div>
           </div>
         )}
       </motion.div>
@@ -463,12 +513,110 @@ function ReferralTracking() {
                     <p className="text-sm text-gray-600">Notes</p>
                     <p className="text-gray-900">{selectedReferral.notes}</p>
                   </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Medical History</p>
+                      <p className="text-gray-900">{selectedReferral.medicalHistory || 'None reported'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Current Medications</p>
+                      <p className="text-gray-900">{selectedReferral.medications || 'None reported'}</p>
+                    </div>
+                  </div>
                   <div>
                     <p className="text-sm text-gray-600">Insurance</p>
                     <p className="text-gray-900">{selectedReferral.insurance}</p>
                   </div>
+                  {selectedReferral.attachments && selectedReferral.attachments.length > 0 && (
+                    <div>
+                      <p className="text-sm text-gray-600">Attachments</p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {selectedReferral.attachments.map((attachment, index) => (
+                          <span key={index} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                            {attachment}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
+
+              {/* Communication Summary */}
+              {selectedReferral.communicationCount > 0 && (
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Communication</h4>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-blue-800">
+                          {selectedReferral.communicationCount} message(s) exchanged
+                        </p>
+                        <p className="text-xs text-blue-600">
+                          Last communication: {new Date(selectedReferral.lastCommunication).toLocaleString()}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleCommunication(selectedReferral)}
+                        className="text-blue-600 hover:text-blue-800 transition-colors"
+                      >
+                        <SafeIcon icon={FiMessageSquare} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Financial Information */}
+              {selectedReferral.estimatedCost && (
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Financial Information</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Estimated Cost</p>
+                      <p className="text-gray-900 font-medium">${selectedReferral.estimatedCost.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Pre-Authorization</p>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        selectedReferral.preAuthRequired 
+                          ? 'bg-yellow-100 text-yellow-800' 
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        {selectedReferral.preAuthRequired ? 'Required' : 'Not Required'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Appointment Information */}
+              {selectedReferral.appointmentScheduled && (
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Appointment</h4>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center space-x-2">
+                      <SafeIcon icon={FiCheckCircle} className="text-green-600" />
+                      <div>
+                        <p className="text-sm text-green-800">Appointment Scheduled</p>
+                        <p className="text-xs text-green-600">
+                          {new Date(selectedReferral.appointmentDate).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Treatment Outcome */}
+              {selectedReferral.treatmentCompleted && selectedReferral.outcomeNotes && (
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Treatment Outcome</h4>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-sm text-blue-800">{selectedReferral.outcomeNotes}</p>
+                  </div>
+                </div>
+              )}
 
               {/* Status Actions */}
               {selectedReferral.status === 'pending' && (
@@ -576,6 +724,63 @@ function ReferralTracking() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                      <input
+                        type="text"
+                        value={newReferral.patientAddress}
+                        onChange={(e) => setNewReferral({ ...newReferral, patientAddress: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Patient address"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Insurance</label>
+                      <input
+                        type="text"
+                        value={newReferral.insurance}
+                        onChange={(e) => setNewReferral({ ...newReferral, insurance: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Insurance provider"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Medical Information */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Medical Information</h4>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Medical History</label>
+                      <textarea
+                        value={newReferral.medicalHistory}
+                        onChange={(e) => setNewReferral({ ...newReferral, medicalHistory: e.target.value })}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Relevant medical history, conditions, allergies..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Current Medications</label>
+                      <textarea
+                        value={newReferral.medications}
+                        onChange={(e) => setNewReferral({ ...newReferral, medications: e.target.value })}
+                        rows={2}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="List current medications..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Symptoms</label>
+                      <textarea
+                        value={newReferral.symptoms}
+                        onChange={(e) => setNewReferral({ ...newReferral, symptoms: e.target.value })}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Describe patient's symptoms..."
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -662,6 +867,21 @@ function ReferralTracking() {
           </motion.div>
         </motion.div>
       )}
+
+      {/* Templates Modal */}
+      <ReferralTemplates
+        isOpen={showTemplates}
+        onClose={() => setShowTemplates(false)}
+        onTemplateSelected={handleTemplateSelected}
+      />
+
+      {/* Communication Modal */}
+      <ReferralCommunication
+        referralId={selectedReferral?.id}
+        isOpen={showCommunication}
+        onClose={() => setShowCommunication(false)}
+        referralData={selectedReferral}
+      />
     </div>
   );
 }

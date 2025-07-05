@@ -9,9 +9,18 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+body.admin-mode {
+  background: linear-gradient(to bottom right, #ebf8ff, #ffffff, #e0e7ff);
+}
+
+body.admin-red {
+  background: linear-gradient(to bottom right, #fee2e2, #fef2f2);
 }
 
 #root {

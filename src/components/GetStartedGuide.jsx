@@ -55,9 +55,9 @@ function GetStartedGuide() {
         <h1 className="text-3xl font-bold text-gray-900 mb-4">
           Welcome to refer.dental
         </h1>
-        <p className="text-gray-600 text-lg">
-          Let's get you started with our platform in just a few steps
-        </p>
+          <p className="text-gray-600 text-lg">
+            Let&apos;s get you started with our platform in just a few steps
+          </p>
       </motion.div>
 
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8">

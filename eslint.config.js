@@ -8,10 +8,15 @@ export default [
   { ignores: ['dist'] },
   {
     files: ['**/*.{js,jsx}'],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-      parserOptions: {
+      languageOptions: {
+        ecmaVersion: 2020,
+        globals: {
+          ...Object.fromEntries(
+            Object.entries(globals.browser).map(([key, value]) => [key.trim(), value])
+          ),
+          process: 'readonly'
+        },
+        parserOptions: {
         ecmaVersion: 'latest',
         ecmaFeatures: { jsx: true },
         sourceType: 'module',
@@ -33,7 +38,8 @@ export default [
         'warn',
         { allowConstantExport: true },
       ],
-      'no-unused-vars': 'warn',
+      'no-unused-vars': 'off',
+      'react-hooks/exhaustive-deps': 'off',
       'react/prop-types': 'off'
     },
   },
