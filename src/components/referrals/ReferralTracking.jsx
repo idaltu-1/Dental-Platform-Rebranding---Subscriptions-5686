@@ -8,8 +8,13 @@ const { FiSearch, FiPlus, FiEye, FiEdit, FiClock, FiUser, FiMapPin, FiCalendar, 
 function ReferralTracking() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [urgencyFilter, setUrgencyFilter] = useState('all');
   const [selectedReferral, setSelectedReferral] = useState(null);
   const [showNewReferral, setShowNewReferral] = useState(false);
+  const [showEditReferral, setShowEditReferral] = useState(false);
+  const [editingReferral, setEditingReferral] = useState(null);
+  const [sortBy, setSortBy] = useState('date');
+  const [sortOrder, setSortOrder] = useState('desc');
   const [newReferral, setNewReferral] = useState({
     patientName: '',
     patientEmail: '',
@@ -22,7 +27,7 @@ function ReferralTracking() {
     preferredDate: ''
   });
 
-  const referrals = [
+  const [referrals, setReferrals] = useState([
     {
       id: 'REF-001',
       patientName: 'John Smith',
@@ -74,7 +79,7 @@ function ReferralTracking() {
       insurance: 'Cigna',
       symptoms: 'Gum bleeding and recession'
     }
-  ];
+  ]);
 
   const specialtyOptions = [
     'Endodontics',
@@ -110,9 +115,33 @@ function ReferralTracking() {
 
   const filteredReferrals = referrals.filter(referral => {
     const matchesSearch = referral.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      referral.id.toLowerCase().includes(searchTerm.toLowerCase());
+      referral.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      referral.referringDoctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      referral.specialist.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      referral.type.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || referral.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesUrgency = urgencyFilter === 'all' || referral.urgency === urgencyFilter;
+    return matchesSearch && matchesStatus && matchesUrgency;
+  });
+
+  // Sort filtered referrals
+  const sortedReferrals = [...filteredReferrals].sort((a, b) => {
+    let aValue = a[sortBy];
+    let bValue = b[sortBy];
+    
+    if (sortBy === 'date' || sortBy === 'preferredDate') {
+      aValue = new Date(aValue);
+      bValue = new Date(bValue);
+    } else if (typeof aValue === 'string') {
+      aValue = aValue.toLowerCase();
+      bValue = bValue.toLowerCase();
+    }
+    
+    if (sortOrder === 'asc') {
+      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    } else {
+      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+    }
   });
 
   const handleViewReferral = (referral) => {
@@ -124,7 +153,27 @@ function ReferralTracking() {
   };
 
   const handleSaveReferral = () => {
-    console.log('Save new referral:', newReferral);
+    // Validate required fields
+    if (!newReferral.patientName || !newReferral.patientEmail || !newReferral.patientPhone || 
+        !newReferral.referringDoctor || !newReferral.specialist || !newReferral.type) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    // Generate new referral ID
+    const newId = 'REF-' + String(referrals.length + 1).padStart(3, '0');
+    
+    const referralToSave = {
+      ...newReferral,
+      id: newId,
+      status: 'pending',
+      date: new Date().toISOString().split('T')[0],
+      patientAddress: '', // Add empty address for now
+      insurance: '', // Add empty insurance for now
+      symptoms: '' // Add empty symptoms for now
+    };
+
+    setReferrals([...referrals, referralToSave]);
     setShowNewReferral(false);
     setNewReferral({
       patientName: '',
@@ -139,9 +188,73 @@ function ReferralTracking() {
     });
   };
 
+  const handleEditReferral = (referral) => {
+    setEditingReferral(referral);
+    setNewReferral({
+      patientName: referral.patientName,
+      patientEmail: referral.patientEmail,
+      patientPhone: referral.patientPhone,
+      referringDoctor: referral.referringDoctor,
+      specialist: referral.specialist,
+      type: referral.type,
+      urgency: referral.urgency,
+      notes: referral.notes,
+      preferredDate: referral.preferredDate
+    });
+    setShowEditReferral(true);
+  };
+
+  const handleUpdateReferral = () => {
+    // Validate required fields
+    if (!newReferral.patientName || !newReferral.patientEmail || !newReferral.patientPhone || 
+        !newReferral.referringDoctor || !newReferral.specialist || !newReferral.type) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    const updatedReferrals = referrals.map(referral => 
+      referral.id === editingReferral.id 
+        ? { ...referral, ...newReferral }
+        : referral
+    );
+
+    setReferrals(updatedReferrals);
+    setShowEditReferral(false);
+    setEditingReferral(null);
+    setNewReferral({
+      patientName: '',
+      patientEmail: '',
+      patientPhone: '',
+      referringDoctor: '',
+      specialist: '',
+      type: '',
+      urgency: 'normal',
+      notes: '',
+      preferredDate: ''
+    });
+  };
+
   const handleUpdateStatus = (referralId, newStatus) => {
-    console.log('Update status:', referralId, newStatus);
-    // Implement status update logic
+    const updatedReferrals = referrals.map(referral => 
+      referral.id === referralId 
+        ? { ...referral, status: newStatus }
+        : referral
+    );
+    setReferrals(updatedReferrals);
+    
+    // Close modal if it's open for the updated referral
+    if (selectedReferral && selectedReferral.id === referralId) {
+      setSelectedReferral({...selectedReferral, status: newStatus});
+    }
+  };
+
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('desc');
+    }
   };
 
   return (
@@ -259,20 +372,37 @@ function ReferralTracking() {
               className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          <div className="flex space-x-2">
-            {['all', 'pending', 'accepted', 'declined', 'completed'].map((status) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-4 py-2 rounded-lg font-medium transition-all capitalize ${
-                  statusFilter === status
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {status}
-              </button>
-            ))}
+          <div className="flex flex-wrap gap-2">
+            <div className="flex space-x-2">
+              {['all', 'pending', 'accepted', 'declined', 'completed'].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all capitalize ${
+                    statusFilter === status
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
+            <div className="flex space-x-2">
+              {['all', 'low', 'normal', 'high', 'urgent'].map((urgency) => (
+                <button
+                  key={urgency}
+                  onClick={() => setUrgencyFilter(urgency)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all capitalize ${
+                    urgencyFilter === urgency
+                      ? 'bg-orange-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {urgency}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </motion.div>
@@ -288,18 +418,102 @@ function ReferralTracking() {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Referral ID</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Patient</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Referring Doctor</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Specialist</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Type</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Urgency</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                  <button 
+                    onClick={() => handleSort('id')}
+                    className="flex items-center space-x-1 hover:text-blue-600"
+                  >
+                    <span>Referral ID</span>
+                    {sortBy === 'id' && (
+                      <span className="text-blue-600">
+                        {sortOrder === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </button>
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                  <button 
+                    onClick={() => handleSort('patientName')}
+                    className="flex items-center space-x-1 hover:text-blue-600"
+                  >
+                    <span>Patient</span>
+                    {sortBy === 'patientName' && (
+                      <span className="text-blue-600">
+                        {sortOrder === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </button>
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                  <button 
+                    onClick={() => handleSort('referringDoctor')}
+                    className="flex items-center space-x-1 hover:text-blue-600"
+                  >
+                    <span>Referring Doctor</span>
+                    {sortBy === 'referringDoctor' && (
+                      <span className="text-blue-600">
+                        {sortOrder === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </button>
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                  <button 
+                    onClick={() => handleSort('specialist')}
+                    className="flex items-center space-x-1 hover:text-blue-600"
+                  >
+                    <span>Specialist</span>
+                    {sortBy === 'specialist' && (
+                      <span className="text-blue-600">
+                        {sortOrder === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </button>
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                  <button 
+                    onClick={() => handleSort('type')}
+                    className="flex items-center space-x-1 hover:text-blue-600"
+                  >
+                    <span>Type</span>
+                    {sortBy === 'type' && (
+                      <span className="text-blue-600">
+                        {sortOrder === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </button>
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                  <button 
+                    onClick={() => handleSort('status')}
+                    className="flex items-center space-x-1 hover:text-blue-600"
+                  >
+                    <span>Status</span>
+                    {sortBy === 'status' && (
+                      <span className="text-blue-600">
+                        {sortOrder === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </button>
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                  <button 
+                    onClick={() => handleSort('urgency')}
+                    className="flex items-center space-x-1 hover:text-blue-600"
+                  >
+                    <span>Urgency</span>
+                    {sortBy === 'urgency' && (
+                      <span className="text-blue-600">
+                        {sortOrder === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </button>
+                </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredReferrals.map((referral) => (
+              {sortedReferrals.map((referral) => (
                 <tr key={referral.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
                     {referral.id}
@@ -338,6 +552,7 @@ function ReferralTracking() {
                         <SafeIcon icon={FiEye} />
                       </button>
                       <button
+                        onClick={() => handleEditReferral(referral)}
                         className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                         title="Edit Referral"
                       >
@@ -351,7 +566,7 @@ function ReferralTracking() {
           </table>
         </div>
 
-        {filteredReferrals.length === 0 && (
+        {sortedReferrals.length === 0 && (
           <div className="text-center py-12">
             <SafeIcon icon={FiUser} className="text-gray-300 text-4xl mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No referrals found</h3>
@@ -653,6 +868,164 @@ function ReferralTracking() {
                 </button>
                 <button
                   onClick={() => setShowNewReferral(false)}
+                  className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* Edit Referral Modal */}
+      {showEditReferral && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowEditReferral(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-bold text-gray-900">Edit Referral</h3>
+                <button
+                  onClick={() => setShowEditReferral(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
+                >
+                  <SafeIcon icon={FiX} />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="space-y-6">
+                {/* Patient Information */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Patient Information</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Patient Name</label>
+                      <input
+                        type="text"
+                        value={newReferral.patientName}
+                        onChange={(e) => setNewReferral({ ...newReferral, patientName: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter patient name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <input
+                        type="email"
+                        value={newReferral.patientEmail}
+                        onChange={(e) => setNewReferral({ ...newReferral, patientEmail: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="patient@email.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                      <input
+                        type="tel"
+                        value={newReferral.patientPhone}
+                        onChange={(e) => setNewReferral({ ...newReferral, patientPhone: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="(555) 123-4567"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Date</label>
+                      <input
+                        type="date"
+                        value={newReferral.preferredDate}
+                        onChange={(e) => setNewReferral({ ...newReferral, preferredDate: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Referral Details */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Referral Details</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Referring Doctor</label>
+                      <input
+                        type="text"
+                        value={newReferral.referringDoctor}
+                        onChange={(e) => setNewReferral({ ...newReferral, referringDoctor: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Dr. Name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Specialist</label>
+                      <input
+                        type="text"
+                        value={newReferral.specialist}
+                        onChange={(e) => setNewReferral({ ...newReferral, specialist: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Specialist name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Specialty Type</label>
+                      <select
+                        value={newReferral.type}
+                        onChange={(e) => setNewReferral({ ...newReferral, type: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Select specialty</option>
+                        {specialtyOptions.map(specialty => (
+                          <option key={specialty} value={specialty}>{specialty}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Urgency</label>
+                      <select
+                        value={newReferral.urgency}
+                        onChange={(e) => setNewReferral({ ...newReferral, urgency: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {urgencyOptions.map(option => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Clinical Notes</label>
+                  <textarea
+                    value={newReferral.notes}
+                    onChange={(e) => setNewReferral({ ...newReferral, notes: e.target.value })}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter clinical notes, symptoms, and treatment recommendations..."
+                  />
+                </div>
+              </div>
+
+              <div className="flex space-x-3 pt-6 border-t border-gray-200 mt-6">
+                <button
+                  onClick={handleUpdateReferral}
+                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Update Referral
+                </button>
+                <button
+                  onClick={() => setShowEditReferral(false)}
                   className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
                 >
                   Cancel
