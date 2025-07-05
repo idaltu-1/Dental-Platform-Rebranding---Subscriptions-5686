@@ -18,6 +18,9 @@ import CustomIntegrations from './components/CustomIntegrations';
 import OnboardingWizard from './components/onboarding/OnboardingWizard';
 import PricingPlans from './components/PricingPlans';
 import SubscriptionDashboard from './components/subscription/SubscriptionDashboard';
+import SubscriptionAnalytics from './components/subscription/SubscriptionAnalytics';
+import DiscountManager from './components/subscription/DiscountManager';
+import RewardsDashboard from './components/rewards/RewardsDashboard';
 import ProfileScreen from './components/ProfileScreen';
 import AdminRoute from './components/admin/AdminRoute';
 import useAdminFavicon from './hooks/useAdminFavicon';
@@ -164,6 +167,36 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <SubscriptionDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                {/* Subscription Analytics */}
+                <Route 
+                  path="subscription/analytics" 
+                  element={
+                    <ProtectedRoute>
+                      <SubscriptionAnalytics />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                {/* Discount Manager */}
+                <Route 
+                  path="subscription/discounts" 
+                  element={
+                    <ProtectedRoute>
+                      <DiscountManager />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                {/* Rewards Dashboard */}
+                <Route 
+                  path="rewards" 
+                  element={
+                    <ProtectedRoute>
+                      <RewardsDashboard />
                     </ProtectedRoute>
                   } 
                 />

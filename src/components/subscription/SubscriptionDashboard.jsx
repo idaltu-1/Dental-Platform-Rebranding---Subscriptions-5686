@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../../common/SafeIcon';
 import { subscriptionService } from '../../services/SubscriptionService';
@@ -9,11 +10,13 @@ import PlanCard from './PlanCard';
 import UsageMetrics from './UsageMetrics';
 import BillingHistory from './BillingHistory';
 import PlanUpgradeModal from './PlanUpgradeModal';
+import SubscriptionRewardsIntegration from './SubscriptionRewardsIntegration';
 
-const { FiCreditCard, FiTrendingUp, FiCalendar, FiSettings, FiDownload, FiAlertCircle, FiCheck, FiX } = FiIcons;
+const { FiCreditCard, FiTrendingUp, FiCalendar, FiSettings, FiDownload, FiAlertCircle, FiCheck, FiX, FiBarChart3, FiTag, FiAward } = FiIcons;
 
 function SubscriptionDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [subscription, setSubscription] = useState(null);
   const [plans, setPlans] = useState([]);
   const [usage, setUsage] = useState(null);
@@ -134,6 +137,27 @@ function SubscriptionDashboard() {
           <p className="text-gray-600">Manage your subscription, billing, and usage</p>
         </div>
         <div className="flex items-center space-x-4">
+          <button 
+            onClick={() => navigate('/subscription/discounts')}
+            className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-medium hover:bg-green-200 transition-colors flex items-center space-x-2"
+          >
+            <SafeIcon icon={FiTag} />
+            <span>Discounts</span>
+          </button>
+          <button 
+            onClick={() => navigate('/subscription/analytics')}
+            className="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg font-medium hover:bg-purple-200 transition-colors flex items-center space-x-2"
+          >
+            <SafeIcon icon={FiBarChart3} />
+            <span>Analytics</span>
+          </button>
+          <button 
+            onClick={() => navigate('/rewards')}
+            className="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg font-medium hover:bg-yellow-200 transition-colors flex items-center space-x-2"
+          >
+            <SafeIcon icon={FiAward} />
+            <span>Rewards</span>
+          </button>
           <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center space-x-2">
             <SafeIcon icon={FiDownload} />
             <span>Download Invoice</span>
@@ -214,6 +238,15 @@ function SubscriptionDashboard() {
           )}
         </motion.div>
       )}
+
+      {/* Subscription & Rewards Integration */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+      >
+        <SubscriptionRewardsIntegration />
+      </motion.div>
 
       {/* Usage Metrics */}
       {usage && (
