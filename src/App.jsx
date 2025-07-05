@@ -29,6 +29,7 @@ import DocumentsScreen from './components/documents/DocumentsScreen';
 import NotificationsScreen from './components/notifications/NotificationsScreen';
 import ScheduleScreen from './components/schedule/ScheduleScreen';
 import ChatScreen from './components/chat/ChatScreen';
+import VerificationDashboard from './components/verification/VerificationDashboard';
 
 // Settings and Help
 import SettingsScreen from './components/settings/SettingsScreen';
@@ -121,6 +122,16 @@ function App() {
                   element={
                     <ProtectedRoute requiredPermission="insurance_verification">
                       <InsuranceScreen />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                {/* Verification Dashboard */}
+                <Route 
+                  path="verification" 
+                  element={
+                    <ProtectedRoute requiredPermission="verification_management">
+                      <VerificationDashboard />
                     </ProtectedRoute>
                   } 
                 />

@@ -9,7 +9,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 const { 
   FiShield, FiClock, FiCheck, FiX, FiAlertTriangle, FiRefreshCw, 
-  FiFilter, FiDownload, FiPlay, FiPause, FiSkipForward 
+  FiFilter, FiDownload, FiPlay, FiPause, FiSkipForward, FiSearch 
 } = FiIcons;
 
 function VerificationDashboard() {
@@ -20,6 +20,14 @@ function VerificationDashboard() {
   const [selectedTab, setSelectedTab] = useState('queue');
   const [selectedItems, setSelectedItems] = useState([]);
   const [autoProcess, setAutoProcess] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+    type: '',
+    status: '',
+    priority: '',
+    riskLevel: ''
+  });
+  const [batchProgress, setBatchProgress] = useState(null);
 
   useEffect(() => {
     loadVerificationData();
@@ -45,6 +53,29 @@ function VerificationDashboard() {
     }
   };
 
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+  };
+
+  const handleFilterChange = (filterType, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
+  };
+
+  const getFilteredData = () => {
+    if (selectedTab === 'queue') {
+      return searchTerm || Object.values(filters).some(f => f) 
+        ? verificationService.searchVerificationQueue(searchTerm, filters)
+        : queue;
+    } else {
+      return searchTerm || Object.values(filters).some(f => f)
+        ? verificationService.searchVerificationHistory(searchTerm, filters)
+        : history;
+    }
+  };
+
   const handleBatchVerification = async () => {
     if (selectedItems.length === 0) {
       toast.error('Please select items to verify');
@@ -52,18 +83,26 @@ function VerificationDashboard() {
     }
 
     try {
-      toast.loading('Processing batch verification...', { id: 'batch-verify' });
+      toast.loading('Starting batch verification...', { id: 'batch-verify' });
+      setBatchProgress({ current: 0, total: selectedItems.length, percentage: 0 });
       
-      const result = await verificationService.batchVerify(selectedItems);
+      const result = await verificationService.batchVerify(selectedItems, (progress) => {
+        setBatchProgress(progress);
+        toast.loading(`Processing ${progress.current}/${progress.total} (${progress.percentage}%)`, { id: 'batch-verify' });
+      });
+      
+      setBatchProgress(null);
       
       if (result.success) {
-        toast.success(`Verified ${selectedItems.length} items successfully`, { id: 'batch-verify' });
+        const { successful, failed } = result.summary;
+        toast.success(`Batch verification completed: ${successful} successful, ${failed} failed`, { id: 'batch-verify' });
         setSelectedItems([]);
         loadVerificationData();
       } else {
         toast.error('Batch verification failed', { id: 'batch-verify' });
       }
     } catch (error) {
+      setBatchProgress(null);
       toast.error('Batch verification failed', { id: 'batch-verify' });
     }
   };
@@ -279,23 +318,139 @@ function VerificationDashboard() {
         </nav>
       </motion.div>
 
-      {/* Content */}
+      {/* Search and Filter Bar */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
+        className="bg-white rounded-xl p-4 shadow-lg border border-gray-100 mb-6"
+      >
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div className="flex-1 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <SafeIcon icon={FiSearch} className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search verifications..."
+              value={searchTerm}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          
+          <div className="flex gap-2">
+            <select
+              value={filters.type}
+              onChange={(e) => handleFilterChange('type', e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">All Types</option>
+              <option value="insurance">Insurance</option>
+              <option value="patient_identity">Identity</option>
+              <option value="document">Document</option>
+            </select>
+            
+            <select
+              value={filters.status}
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="verified">Verified</option>
+              <option value="failed">Failed</option>
+            </select>
+            
+            {selectedTab === 'queue' && (
+              <select
+                value={filters.priority}
+                onChange={(e) => handleFilterChange('priority', e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">All Priority</option>
+                <option value="high">High</option>
+                <option value="normal">Normal</option>
+                <option value="low">Low</option>
+              </select>
+            )}
+            
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setFilters({ type: '', status: '', priority: '', riskLevel: '' });
+              }}
+              className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+        
+        {/* Batch Actions */}
+        {selectedTab === 'queue' && selectedItems.length > 0 && (
+          <div className="mt-4 p-3 bg-blue-50 rounded-md border border-blue-200">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-blue-700">
+                {selectedItems.length} item{selectedItems.length !== 1 ? 's' : ''} selected
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleBatchVerification}
+                  disabled={batchProgress !== null}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {batchProgress ? `Processing ${batchProgress.percentage}%` : 'Verify Selected'}
+                </button>
+                <button
+                  onClick={() => setSelectedItems([])}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                >
+                  Clear Selection
+                </button>
+              </div>
+            </div>
+            {batchProgress && (
+              <div className="mt-2">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${batchProgress.percentage}%` }}
+                  ></div>
+                </div>
+                <p className="text-xs text-blue-600 mt-1">
+                  Processing {batchProgress.currentItem}... ({batchProgress.current}/{batchProgress.total})
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </motion.div>
+
+      {/* Content */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7 }}
       >
         {selectedTab === 'queue' ? (
           <div className="bg-white rounded-xl shadow-lg border border-gray-100">
-            {queue.length === 0 ? (
-              <div className="p-12 text-center">
-                <SafeIcon icon={FiCheck} className="text-gray-300 text-4xl mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No pending verifications</h3>
-                <p className="text-gray-600">All verifications are up to date</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-100">
-                {queue.map((item, index) => (
+            {(() => {
+              const filteredQueue = getFilteredData();
+              return filteredQueue.length === 0 ? (
+                <div className="p-12 text-center">
+                  <SafeIcon icon={FiCheck} className="text-gray-300 text-4xl mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {queue.length === 0 ? 'No pending verifications' : 'No matching verifications'}
+                  </h3>
+                  <p className="text-gray-600">
+                    {queue.length === 0 ? 'All verifications are up to date' : 'Try adjusting your search or filters'}
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {filteredQueue.map((item, index) => (
                   <div key={item.id} className="p-6 hover:bg-gray-50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
@@ -360,19 +515,26 @@ function VerificationDashboard() {
                   </div>
                 ))}
               </div>
-            )}
+            );
+          })()}
           </div>
         ) : (
           <div className="bg-white rounded-xl shadow-lg border border-gray-100">
-            {history.length === 0 ? (
-              <div className="p-12 text-center">
-                <SafeIcon icon={FiClock} className="text-gray-300 text-4xl mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No verification history</h3>
-                <p className="text-gray-600">Completed verifications will appear here</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-100">
-                {history.map((item) => (
+            {(() => {
+              const filteredHistory = getFilteredData();
+              return filteredHistory.length === 0 ? (
+                <div className="p-12 text-center">
+                  <SafeIcon icon={FiClock} className="text-gray-300 text-4xl mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {history.length === 0 ? 'No verification history' : 'No matching verifications'}
+                  </h3>
+                  <p className="text-gray-600">
+                    {history.length === 0 ? 'Completed verifications will appear here' : 'Try adjusting your search or filters'}
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {filteredHistory.map((item) => (
                   <div key={item.id} className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
@@ -418,7 +580,8 @@ function VerificationDashboard() {
                   </div>
                 ))}
               </div>
-            )}
+            );
+          })()}
           </div>
         )}
       </motion.div>
