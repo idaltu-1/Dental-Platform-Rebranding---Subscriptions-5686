@@ -6,16 +6,13 @@ class SubscriptionService {
       {
         id: 'trial',
         name: 'trial',
-        displayName: 'Free Trial',
-        amount: 0,
+        displayName: 'Trial Plan',
+        amount: 1,
         currency: 'usd',
         interval: 'month',
         features: [
-          'Up to 10 patients',
-          'Basic appointment scheduling',
-          'Email support',
-          'Basic reporting',
-          'Patient record management'
+          'Limited access',
+          'Community support'
         ],
         limits: {
           patients: 10,
@@ -35,20 +32,16 @@ class SubscriptionService {
         interval: 'month',
         features: [
           'Up to 100 patients',
-          'Advanced appointment scheduling',
-          'Patient records & history',
-          'Basic reporting & analytics',
-          'Email & SMS notifications',
-          'Insurance verification',
-          'Basic billing management',
+          'Basic appointment scheduling',
+          'Patient records management',
           'Email support',
-          'Mobile app access'
+          'Basic reporting'
         ],
         limits: {
           patients: 100,
           referrals: 50,
-          storage: '2GB',
-          users: 3
+          storage: '1GB',
+          users: 2
         },
         stripeProductId: 'prod_starter',
         stripePriceId: 'price_1RemJgEWGT02FQpC9UZ3PNXp'
@@ -62,23 +55,18 @@ class SubscriptionService {
         interval: 'month',
         features: [
           'Unlimited patients',
-          'AI-powered scheduling optimization',
-          'Advanced treatment planning',
-          'Comprehensive insurance management',
-          'Advanced analytics & reporting',
-          'SMS & email automation',
-          'Clinical note templates',
-          'Voice-to-text transcription',
-          'Financial reporting',
-          'Priority support',
-          'Mobile app with offline access',
-          'API access'
+          'Advanced scheduling',
+          'Treatment planning',
+          'Insurance management',
+          'Advanced reporting',
+          'SMS notifications',
+          'Priority support'
         ],
         limits: {
           patients: -1, // unlimited
           referrals: -1,
-          storage: '25GB',
-          users: 15
+          storage: '10GB',
+          users: 10
         },
         stripeProductId: 'prod_professional',
         stripePriceId: 'price_1RemJgEWGT02FQpCn8yAw9DE'
@@ -87,25 +75,18 @@ class SubscriptionService {
         id: 'enterprise',
         name: 'enterprise',
         displayName: 'Enterprise Plan',
-        amount: 299,
+        amount: 499,
         currency: 'usd',
         interval: 'month',
         features: [
-          'Everything in Professional',
-          'Multi-location management',
-          'AI-powered diagnostic assistance',
-          'Telemedicine platform',
-          'Advanced custom integrations',
-          'Comprehensive staff management',
+          'Multi-location support',
+          'Custom integrations',
+          'Advanced analytics',
+          'Staff management',
+          'API access',
           'White-label options',
-          'Advanced security features',
-          'Custom workflow automation',
-          'Revenue cycle management',
-          'Advanced analytics dashboard',
-          'API access & webhooks',
           '24/7 phone support',
-          'Dedicated account manager',
-          'Custom training sessions'
+          'Dedicated account manager'
         ],
         limits: {
           patients: -1,
@@ -120,34 +101,23 @@ class SubscriptionService {
         id: 'celestial',
         name: 'celestial',
         displayName: 'Celestial Plan',
-        amount: 599,
+        amount: 999999,
         currency: 'usd',
-        interval: 'month',
+        interval: 'year',
         features: [
-          'Everything in Enterprise',
-          'Advanced AI diagnostic tools',
-          'Predictive analytics engine',
-          'Machine learning insights',
-          'Custom AI model training',
-          'Advanced telemedicine features',
-          'IoT device integrations',
-          'Blockchain patient records',
-          'Advanced compliance automation',
-          'Custom enterprise integrations',
-          'Unlimited storage & bandwidth',
-          'Priority feature development',
-          'Executive support team',
-          'Custom SLA agreements',
-          'On-premise deployment options'
+          'Unlimited everything',
+          'Priority 24/7 support',
+          'Dedicated success manager',
+          'Custom integrations'
         ],
         limits: {
           patients: -1,
           referrals: -1,
-          storage: 'Unlimited',
+          storage: '1TB',
           users: -1
         },
         stripeProductId: 'prod_celestial',
-        stripePriceId: 'price_celestial_month'
+        stripePriceId: 'price_celestial_year'
       }
     ];
   }
