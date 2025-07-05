@@ -11,7 +11,8 @@ import toast from 'react-hot-toast';
 const {
   FiHome, FiUsers, FiSettings, FiCalendar, FiBarChart3, FiHelpCircle, FiPlay, 
   FiFileText, FiMenu, FiShare2, FiCreditCard, FiUpload, FiMessageSquare, FiBell, 
-  FiChevronLeft, FiChevronRight, FiDollarSign, FiUser, FiLogOut, FiEdit, FiX, FiPlus
+  FiChevronLeft, FiChevronRight, FiDollarSign, FiUser, FiLogOut, FiEdit, FiX, FiPlus,
+  FiGift, FiAward, FiTag, FiTrendingUp
 } = FiIcons;
 
 function Sidebar() {
@@ -44,6 +45,7 @@ function Sidebar() {
     {path: '/chat', label: 'Chat', icon: FiMessageSquare, permission: 'chat_system', minPlan: 'professional'},
     {path: '/notifications', label: 'Notifications', icon: FiBell, permission: null, minPlan: 'starter'},
     {path: '/analytics', label: 'Analytics', icon: FiBarChart3, permission: 'analytics', minPlan: 'enterprise'},
+    {path: '/rewards', label: 'Rewards', icon: FiAward, permission: null, minPlan: 'starter'},
     {path: '/subscription', label: 'Subscription', icon: FiDollarSign, permission: null, minPlan: 'starter'},
     {path: '/integrations', label: 'Integrations', icon: FiSettings, permission: null, minPlan: 'enterprise'},
     {path: '/get-started', label: 'Get Started', icon: FiPlay, permission: null, minPlan: 'starter'},
