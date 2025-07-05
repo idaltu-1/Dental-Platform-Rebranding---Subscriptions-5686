@@ -11,8 +11,7 @@ import toast from 'react-hot-toast';
 const {
   FiHome, FiUsers, FiSettings, FiCalendar, FiBarChart3, FiHelpCircle, FiPlay, 
   FiFileText, FiMenu, FiShare2, FiCreditCard, FiUpload, FiMessageSquare, FiBell, 
-  FiChevronLeft, FiChevronRight, FiDollarSign, FiUser, FiLogOut, FiEdit, FiX, FiPlus,
-  FiVideo, FiBot, FiZap, FiTrendingUp
+  FiChevronLeft, FiChevronRight, FiDollarSign, FiUser, FiLogOut, FiEdit, FiX, FiPlus
 } = FiIcons;
 
 function Sidebar() {
@@ -40,16 +39,13 @@ function Sidebar() {
     {path: '/referrals', label: 'Referral Tracking', icon: FiShare2, permission: 'referral_management', minPlan: 'professional'},
     {path: '/schedule', label: 'Schedule', icon: FiCalendar, permission: 'schedule_management', minPlan: 'professional'},
     {path: '/clinical-notes', label: 'Clinical Notes', icon: FiFileText, permission: 'clinical_notes', minPlan: 'professional'},
-    {path: '/telemedicine', label: 'Telemedicine', icon: FiVideo, permission: 'telemedicine', minPlan: 'professional'},
-    {path: '/ai-assistant', label: 'AI Assistant', icon: FiBot, permission: 'ai_features', minPlan: 'enterprise'},
     {path: '/insurance', label: 'Insurance', icon: FiCreditCard, permission: 'insurance_verification', minPlan: 'professional'},
     {path: '/documents', label: 'Documents', icon: FiUpload, permission: 'document_management', minPlan: 'professional'},
     {path: '/chat', label: 'Chat', icon: FiMessageSquare, permission: 'chat_system', minPlan: 'professional'},
     {path: '/notifications', label: 'Notifications', icon: FiBell, permission: null, minPlan: 'starter'},
-    {path: '/analytics', label: 'Analytics', icon: FiBarChart3, permission: 'analytics', minPlan: 'professional'},
-    {path: '/advanced-analytics', label: 'Advanced Analytics', icon: FiTrendingUp, permission: 'analytics', minPlan: 'enterprise'},
+    {path: '/analytics', label: 'Analytics', icon: FiBarChart3, permission: 'analytics', minPlan: 'enterprise'},
     {path: '/subscription', label: 'Subscription', icon: FiDollarSign, permission: null, minPlan: 'starter'},
-    {path: '/integrations', label: 'Integrations', icon: FiSettings, permission: null, minPlan: 'professional'},
+    {path: '/integrations', label: 'Integrations', icon: FiSettings, permission: null, minPlan: 'enterprise'},
     {path: '/get-started', label: 'Get Started', icon: FiPlay, permission: null, minPlan: 'starter'},
     {path: '/help', label: 'Help', icon: FiHelpCircle, permission: null, minPlan: 'starter'}
   ];
