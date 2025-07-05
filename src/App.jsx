@@ -14,6 +14,7 @@ import Dashboard from './components/Dashboard';
 import PatientManagement from './components/PatientManagement';
 import ClinicalNotesScreen from './components/ClinicalNotes/ClinicalNotesScreen';
 import AnalyticsScreen from './components/analytics/AnalyticsScreen';
+import AdvancedAnalytics from './components/analytics/AdvancedAnalytics';
 import CustomIntegrations from './components/CustomIntegrations';
 import OnboardingWizard from './components/onboarding/OnboardingWizard';
 import PricingPlans from './components/PricingPlans';
@@ -21,6 +22,10 @@ import SubscriptionDashboard from './components/subscription/SubscriptionDashboa
 import ProfileScreen from './components/ProfileScreen';
 import AdminRoute from './components/admin/AdminRoute';
 import useAdminFavicon from './hooks/useAdminFavicon';
+
+// Advanced Features
+import TelemedicineHub from './components/telemedicine/TelemedicineHub';
+import AIAssistant from './components/ai/AIAssistant';
 
 // New screens to implement
 import ReferralTracking from './components/referrals/ReferralTracking';
@@ -154,6 +159,36 @@ function App() {
                   element={
                     <ProtectedRoute requiredPermission="analytics">
                       <AnalyticsScreen />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                {/* Advanced Analytics */}
+                <Route 
+                  path="advanced-analytics" 
+                  element={
+                    <ProtectedRoute requiredPermission="analytics">
+                      <AdvancedAnalytics />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                {/* Telemedicine Hub */}
+                <Route 
+                  path="telemedicine" 
+                  element={
+                    <ProtectedRoute requiredPermission="telemedicine">
+                      <TelemedicineHub />
+                    </ProtectedRoute>
+                  } 
+                />
+
+                {/* AI Assistant */}
+                <Route 
+                  path="ai-assistant" 
+                  element={
+                    <ProtectedRoute requiredPermission="ai_features">
+                      <AIAssistant />
                     </ProtectedRoute>
                   } 
                 />
