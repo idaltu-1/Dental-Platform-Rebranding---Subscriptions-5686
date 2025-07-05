@@ -70,7 +70,7 @@ function Sidebar() {
   };
 
   const handleQuickReferral = () => {
-    navigate('/referrals', { state: { createNew: true } });
+    navigate('referrals', { state: { createNew: true } });
     setIsMobileMenuOpen(false);
     toast.success('Opening new referral form...');
   };
@@ -79,7 +79,7 @@ function Sidebar() {
     if (isCollapsed) {
       setShowProfileMenu(!showProfileMenu);
     } else {
-      navigate('/profile');
+      navigate('profile');
     }
   };
 

@@ -22,7 +22,7 @@ function Dashboard() {
       change: '+12%',
       icon: FiUsers,
       color: 'from-blue-500 to-blue-600',
-      onClick: () => navigate('/patients')
+      onClick: () => navigate('patients')
     },
     {
       title: 'Today\'s Appointments',
@@ -30,7 +30,7 @@ function Dashboard() {
       change: '+5%',
       icon: FiCalendar,
       color: 'from-green-500 to-green-600',
-      onClick: () => navigate('/schedule')
+      onClick: () => navigate('schedule')
     },
     {
       title: 'Monthly Revenue',
@@ -38,7 +38,7 @@ function Dashboard() {
       change: '+18%',
       icon: FiDollarSign,
       color: 'from-purple-500 to-purple-600',
-      onClick: () => navigate('/analytics')
+      onClick: () => navigate('analytics')
     },
     {
       title: 'Completion Rate',
@@ -46,7 +46,7 @@ function Dashboard() {
       change: '+2%',
       icon: FiCheckCircle,
       color: 'from-orange-500 to-orange-600',
-      onClick: () => navigate('/analytics')
+      onClick: () => navigate('analytics')
     }
   ];
 
@@ -102,15 +102,15 @@ function Dashboard() {
   };
 
   const handleEditAppointment = (appointment) => {
-    navigate('/schedule', { state: { editAppointment: appointment } });
+    navigate('schedule', { state: { editAppointment: appointment } });
   };
 
   const handleViewAllAppointments = () => {
-    navigate('/schedule');
+    navigate('schedule');
   };
 
   const handleCreateAppointment = () => {
-    navigate('/schedule', { state: { createNew: true } });
+    navigate('schedule', { state: { createNew: true } });
   };
 
   const handleStatClick = (stat) => {

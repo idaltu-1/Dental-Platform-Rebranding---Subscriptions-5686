@@ -185,7 +185,7 @@ function PatientManagement() {
   };
 
   const handleScheduleAppointment = (patient) => {
-    navigate('/schedule', { state: { patientId: patient.id, patientName: patient.name } });
+    navigate('schedule', { state: { patientId: patient.id, patientName: patient.name } });
   };
 
   return (
