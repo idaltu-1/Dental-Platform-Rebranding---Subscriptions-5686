@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../../common/SafeIcon';
+import toast from 'react-hot-toast';
 
 const { FiSearch, FiPlus, FiEye, FiEdit, FiClock, FiUser, FiMapPin, FiCalendar, FiX, FiPhone, FiMail } = FiIcons;
 
@@ -148,15 +149,41 @@ function ReferralTracking() {
     setSelectedReferral(referral);
   };
 
+  const resetForm = () => {
+    setNewReferral({
+      patientName: '',
+      patientEmail: '',
+      patientPhone: '',
+      referringDoctor: '',
+      specialist: '',
+      type: '',
+      urgency: 'normal',
+      notes: '',
+      preferredDate: ''
+    });
+  };
+
   const handleNewReferral = () => {
+    resetForm();
     setShowNewReferral(true);
+  };
+
+  const handleCancelNew = () => {
+    resetForm();
+    setShowNewReferral(false);
+  };
+
+  const handleCancelEdit = () => {
+    resetForm();
+    setShowEditReferral(false);
+    setEditingReferral(null);
   };
 
   const handleSaveReferral = () => {
     // Validate required fields
     if (!newReferral.patientName || !newReferral.patientEmail || !newReferral.patientPhone || 
         !newReferral.referringDoctor || !newReferral.specialist || !newReferral.type) {
-      alert('Please fill in all required fields');
+      toast.error('Please fill in all required fields');
       return;
     }
 
@@ -175,17 +202,9 @@ function ReferralTracking() {
 
     setReferrals([...referrals, referralToSave]);
     setShowNewReferral(false);
-    setNewReferral({
-      patientName: '',
-      patientEmail: '',
-      patientPhone: '',
-      referringDoctor: '',
-      specialist: '',
-      type: '',
-      urgency: 'normal',
-      notes: '',
-      preferredDate: ''
-    });
+    resetForm();
+    
+    toast.success('Referral created successfully!');
   };
 
   const handleEditReferral = (referral) => {
@@ -208,7 +227,7 @@ function ReferralTracking() {
     // Validate required fields
     if (!newReferral.patientName || !newReferral.patientEmail || !newReferral.patientPhone || 
         !newReferral.referringDoctor || !newReferral.specialist || !newReferral.type) {
-      alert('Please fill in all required fields');
+      toast.error('Please fill in all required fields');
       return;
     }
 
@@ -221,17 +240,9 @@ function ReferralTracking() {
     setReferrals(updatedReferrals);
     setShowEditReferral(false);
     setEditingReferral(null);
-    setNewReferral({
-      patientName: '',
-      patientEmail: '',
-      patientPhone: '',
-      referringDoctor: '',
-      specialist: '',
-      type: '',
-      urgency: 'normal',
-      notes: '',
-      preferredDate: ''
-    });
+    resetForm();
+    
+    toast.success('Referral updated successfully!');
   };
 
   const handleUpdateStatus = (referralId, newStatus) => {
@@ -246,6 +257,14 @@ function ReferralTracking() {
     if (selectedReferral && selectedReferral.id === referralId) {
       setSelectedReferral({...selectedReferral, status: newStatus});
     }
+    
+    const statusMessages = {
+      accepted: 'Referral accepted successfully!',
+      declined: 'Referral declined',
+      completed: 'Referral marked as completed!'
+    };
+    
+    toast.success(statusMessages[newStatus] || `Referral status updated to ${newStatus}`);
   };
 
   const handleSort = (column) => {
@@ -726,7 +745,7 @@ function ReferralTracking() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-          onClick={() => setShowNewReferral(false)}
+          onClick={handleCancelNew}
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
@@ -738,7 +757,7 @@ function ReferralTracking() {
               <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-bold text-gray-900">New Referral</h3>
                 <button
-                  onClick={() => setShowNewReferral(false)}
+                  onClick={handleCancelNew}
                   className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
                 >
                   <SafeIcon icon={FiX} />
@@ -867,7 +886,7 @@ function ReferralTracking() {
                   Create Referral
                 </button>
                 <button
-                  onClick={() => setShowNewReferral(false)}
+                  onClick={handleCancelNew}
                   className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
                 >
                   Cancel
@@ -884,7 +903,7 @@ function ReferralTracking() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-          onClick={() => setShowEditReferral(false)}
+          onClick={handleCancelEdit}
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
@@ -896,7 +915,7 @@ function ReferralTracking() {
               <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-bold text-gray-900">Edit Referral</h3>
                 <button
-                  onClick={() => setShowEditReferral(false)}
+                  onClick={handleCancelEdit}
                   className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
                 >
                   <SafeIcon icon={FiX} />
@@ -1025,7 +1044,7 @@ function ReferralTracking() {
                   Update Referral
                 </button>
                 <button
-                  onClick={() => setShowEditReferral(false)}
+                  onClick={handleCancelEdit}
                   className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
                 >
                   Cancel
