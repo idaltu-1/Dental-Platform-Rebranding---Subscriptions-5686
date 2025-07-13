@@ -39,7 +39,6 @@ import HelpScreen from './components/help/HelpScreen';
 
 // Feedback System
 import FeedbackProvider from './components/feedback/FeedbackProvider';
-import FeedbackButton from './components/feedback/FeedbackButton';
 
 function App() {
   useAdminFavicon();
@@ -288,11 +287,6 @@ function App() {
                 } 
               />
             </Routes>
-
-            {/* Global Feedback Button - Available on all protected routes */}
-            <ProtectedRoute>
-              <FeedbackButton />
-            </ProtectedRoute>
           </div>
 
           {/* Toast Notifications */}

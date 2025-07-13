@@ -1,6 +1,7 @@
 import React from 'react';
 import {Outlet} from 'react-router-dom';
 import Sidebar from './Sidebar';
+import FeedbackButton from './feedback/FeedbackButton';
 
 function DashboardLayout() {
   return (
@@ -13,6 +14,8 @@ function DashboardLayout() {
           </div>
         </div>
       </div>
+      {/* Feedback Button - Available on all dashboard routes */}
+      <FeedbackButton />
     </div>
   );
 }
