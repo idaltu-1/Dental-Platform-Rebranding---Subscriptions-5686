@@ -1,16 +1,18 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import {motion, AnimatePresence} from 'framer-motion';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
 import {useAuth} from '../contexts/AuthContext';
 import {roleService} from '../services/RoleService';
+import {subscriptionService} from '../services/SubscriptionService';
 import toast from 'react-hot-toast';
 
 const {
   FiHome, FiUsers, FiSettings, FiCalendar, FiBarChart3, FiHelpCircle, FiPlay, 
   FiFileText, FiMenu, FiShare2, FiCreditCard, FiUpload, FiMessageSquare, FiBell, 
-  FiChevronLeft, FiChevronRight, FiDollarSign, FiUser, FiLogOut, FiEdit, FiX, FiPlus
+  FiChevronLeft, FiChevronRight, FiDollarSign, FiUser, FiLogOut, FiEdit, FiX, FiPlus,
+  FiGift, FiAward, FiTag, FiTrendingUp
 } = FiIcons;
 
 function Sidebar() {
@@ -20,31 +22,46 @@ function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [planId, setPlanId] = useState(null);
+
+  useEffect(() => {
+    async function fetchPlan() {
+      if (user) {
+        const sub = await subscriptionService.getSubscription(user.id);
+        setPlanId(sub?.planId || null);
+      }
+    }
+    fetchPlan();
+  }, [user]);
 
   const allMenuItems = [
-    {path: '/dashboard', label: 'Dashboard', icon: FiHome, permission: null},
-    {path: '/patients', label: 'Patients', icon: FiUsers, permission: 'patient_management'},
-    {path: '/referrals', label: 'Referral Tracking', icon: FiShare2, permission: 'referral_management'},
-    {path: '/schedule', label: 'Schedule', icon: FiCalendar, permission: 'schedule_management'},
-    {path: '/clinical-notes', label: 'Clinical Notes', icon: FiFileText, permission: 'clinical_notes'},
-    {path: '/insurance', label: 'Insurance', icon: FiCreditCard, permission: 'insurance_verification'},
-    {path: '/documents', label: 'Documents', icon: FiUpload, permission: 'document_management'},
-    {path: '/chat', label: 'Chat', icon: FiMessageSquare, permission: 'chat_system'},
-    {path: '/notifications', label: 'Notifications', icon: FiBell, permission: null},
-    {path: '/analytics', label: 'Analytics', icon: FiBarChart3, permission: 'analytics'},
-    {path: '/subscription', label: 'Subscription', icon: FiDollarSign, permission: null},
-    {path: '/integrations', label: 'Integrations', icon: FiSettings, permission: null},
-    {path: '/get-started', label: 'Get Started', icon: FiPlay, permission: null},
-    {path: '/help', label: 'Help', icon: FiHelpCircle, permission: null}
+    {path: '/dashboard', label: 'Dashboard', icon: FiHome, permission: null, minPlan: 'starter'},
+    {path: '/patients', label: 'Patients', icon: FiUsers, permission: 'patient_management', minPlan: 'professional'},
+    {path: '/referrals', label: 'Referral Tracking', icon: FiShare2, permission: 'referral_management', minPlan: 'professional'},
+    {path: '/schedule', label: 'Schedule', icon: FiCalendar, permission: 'schedule_management', minPlan: 'professional'},
+    {path: '/clinical-notes', label: 'Clinical Notes', icon: FiFileText, permission: 'clinical_notes', minPlan: 'professional'},
+    {path: '/insurance', label: 'Insurance', icon: FiCreditCard, permission: 'insurance_verification', minPlan: 'professional'},
+    {path: '/documents', label: 'Documents', icon: FiUpload, permission: 'document_management', minPlan: 'professional'},
+    {path: '/chat', label: 'Chat', icon: FiMessageSquare, permission: 'chat_system', minPlan: 'professional'},
+    {path: '/notifications', label: 'Notifications', icon: FiBell, permission: null, minPlan: 'starter'},
+    {path: '/analytics', label: 'Analytics', icon: FiBarChart3, permission: 'analytics', minPlan: 'enterprise'},
+    {path: '/rewards', label: 'Rewards', icon: FiAward, permission: null, minPlan: 'starter'},
+    {path: '/subscription', label: 'Subscription', icon: FiDollarSign, permission: null, minPlan: 'starter'},
+    {path: '/integrations', label: 'Integrations', icon: FiSettings, permission: null, minPlan: 'enterprise'},
+    {path: '/get-started', label: 'Get Started', icon: FiPlay, permission: null, minPlan: 'starter'},
+    {path: '/help', label: 'Help', icon: FiHelpCircle, permission: null, minPlan: 'starter'}
   ];
 
   const getVisibleMenuItems = () => {
     if (!user) return [];
-    
+
     return allMenuItems.filter(item => {
-      if (!item.permission) return true;
-      if (user.role === 'super_admin') return true;
-      return roleService.hasPermission(user.role, item.permission);
+      const hasPerm = !item.permission || user.role === 'super_admin' || roleService.hasPermission(user.role, item.permission);
+      if (!hasPerm) return false;
+      if (!item.minPlan) return true;
+      const userLevel = subscriptionService.getPlanLevel(planId);
+      const requiredLevel = subscriptionService.getPlanLevel(item.minPlan);
+      return userLevel >= requiredLevel;
     });
   };
 
@@ -55,7 +72,7 @@ function Sidebar() {
   };
 
   const handleQuickReferral = () => {
-    navigate('/referrals', { state: { createNew: true } });
+    navigate('referrals', { state: { createNew: true } });
     setIsMobileMenuOpen(false);
     toast.success('Opening new referral form...');
   };
@@ -64,7 +81,7 @@ function Sidebar() {
     if (isCollapsed) {
       setShowProfileMenu(!showProfileMenu);
     } else {
-      navigate('/profile');
+      navigate('profile');
     }
   };
 

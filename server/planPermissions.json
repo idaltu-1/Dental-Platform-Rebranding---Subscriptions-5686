@@ -1,0 +1,81 @@
+{
+  "levels": {
+    "trial": 0,
+    "starter": 1,
+    "professional": 2,
+    "enterprise": 3,
+    "celestial": 4
+  },
+  "plans": {
+    "trial": [
+      "user_view",
+      "user_edit",
+      "user_reset_password",
+      "patient_view"
+    ],
+    "starter": [
+      "user_view",
+      "user_edit",
+      "user_reset_password",
+      "patient_view"
+    ],
+    "professional": [
+      "user_view",
+      "user_edit",
+      "user_reset_password",
+      "patient_view",
+      "patient_delete",
+      "patient_export",
+      "subscription_view",
+      "audit_logging",
+      "role_checks"
+    ],
+    "enterprise": [
+      "super_admin_dashboard",
+      "user_view",
+      "user_edit",
+      "user_reset_password",
+      "user_suspend",
+      "user_delete",
+      "user_search",
+      "patient_view",
+      "patient_delete",
+      "patient_export",
+      "patient_search",
+      "subscription_view",
+      "subscription_modify",
+      "subscription_cancel",
+      "subscription_reactivate",
+      "subscription_revenue",
+      "subscription_billing_history",
+      "admin_route_protection",
+      "ui_indicators",
+      "audit_logging",
+      "confirmation_dialogs"
+    ],
+    "celestial": [
+      "super_admin_dashboard",
+      "user_view",
+      "user_edit",
+      "user_reset_password",
+      "user_suspend",
+      "user_delete",
+      "user_search",
+      "patient_view",
+      "patient_delete",
+      "patient_export",
+      "patient_search",
+      "subscription_view",
+      "subscription_modify",
+      "subscription_cancel",
+      "subscription_reactivate",
+      "subscription_revenue",
+      "subscription_billing_history",
+      "admin_route_protection",
+      "ui_indicators",
+      "audit_logging",
+      "confirmation_dialogs",
+      "future_premium"
+    ]
+  }
+}

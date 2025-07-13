@@ -1,12 +1,34 @@
 class SubscriptionService {
   constructor() {
     this.subscriptions = this.initializeMockData();
+    this.planHierarchy = { trial: 0, starter: 1, professional: 2, enterprise: 3, celestial: 4 };
+    this.initializeCoupons();
     this.plans = [
+      {
+        id: 'trial',
+        name: 'trial',
+        displayName: 'Trial Plan',
+        amount: 1,
+        currency: 'usd',
+        interval: 'month',
+        features: [
+          'Limited access',
+          'Community support'
+        ],
+        limits: {
+          patients: 10,
+          referrals: 5,
+          storage: '500MB',
+          users: 1
+        },
+        stripeProductId: 'prod_trial',
+        stripePriceId: 'price_trial_month'
+      },
       {
         id: 'starter',
         name: 'Starter',
         displayName: 'Starter Plan',
-        amount: 29,
+        amount: 49,
         currency: 'usd',
         interval: 'month',
         features: [
@@ -29,7 +51,7 @@ class SubscriptionService {
         id: 'professional',
         name: 'professional',
         displayName: 'Professional Plan',
-        amount: 79,
+        amount: 99,
         currency: 'usd',
         interval: 'month',
         features: [
@@ -75,6 +97,28 @@ class SubscriptionService {
         },
         stripeProductId: 'prod_enterprise',
         stripePriceId: 'price_1RemJgEWGT02FQpCJZSuLumG'
+      },
+      {
+        id: 'celestial',
+        name: 'celestial',
+        displayName: 'Celestial Plan',
+        amount: 999999,
+        currency: 'usd',
+        interval: 'year',
+        features: [
+          'Unlimited everything',
+          'Priority 24/7 support',
+          'Dedicated success manager',
+          'Custom integrations'
+        ],
+        limits: {
+          patients: -1,
+          referrals: -1,
+          storage: '1TB',
+          users: -1
+        },
+        stripeProductId: 'prod_celestial',
+        stripePriceId: 'price_celestial_year'
       }
     ];
   }
@@ -386,15 +430,17 @@ class SubscriptionService {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  getPlanLevel(planId) {
+    return this.planHierarchy[planId] || 0;
+  }
+
   // Helper methods for plan comparisons
   isPlanUpgrade(currentPlanId, newPlanId) {
-    const planHierarchy = { starter: 1, professional: 2, enterprise: 3 };
-    return planHierarchy[newPlanId] > planHierarchy[currentPlanId];
+    return this.getPlanLevel(newPlanId) > this.getPlanLevel(currentPlanId);
   }
 
   isPlanDowngrade(currentPlanId, newPlanId) {
-    const planHierarchy = { starter: 1, professional: 2, enterprise: 3 };
-    return planHierarchy[newPlanId] < planHierarchy[currentPlanId];
+    return this.getPlanLevel(newPlanId) < this.getPlanLevel(currentPlanId);
   }
 
   calculateProration(currentPlan, newPlan, daysRemaining) {
@@ -408,6 +454,418 @@ class SubscriptionService {
       charge: newCharge,
       difference: newCharge - currentCredit
     };
+  }
+
+  // New discount and coupon system
+  async createCoupon(code, discountType, discountValue, expiryDate, usageLimit = null) {
+    await this.simulateDelay(500);
+    
+    const coupon = {
+      id: `coupon_${Date.now()}`,
+      code: code.toUpperCase(),
+      discountType, // 'percentage' or 'fixed'
+      discountValue,
+      expiryDate,
+      usageLimit,
+      currentUsage: 0,
+      active: true,
+      createdAt: new Date()
+    };
+    
+    if (!this.coupons) {
+      this.coupons = [];
+    }
+    this.coupons.push(coupon);
+    
+    return coupon;
+  }
+
+  async validateCoupon(couponCode) {
+    await this.simulateDelay(300);
+    
+    if (!this.coupons) {
+      this.coupons = [];
+    }
+    
+    const coupon = this.coupons.find(c => c.code === couponCode.toUpperCase());
+    
+    if (!coupon) {
+      throw new Error('Invalid coupon code');
+    }
+    
+    if (!coupon.active) {
+      throw new Error('Coupon is no longer active');
+    }
+    
+    if (coupon.expiryDate && new Date() > new Date(coupon.expiryDate)) {
+      throw new Error('Coupon has expired');
+    }
+    
+    if (coupon.usageLimit && coupon.currentUsage >= coupon.usageLimit) {
+      throw new Error('Coupon usage limit reached');
+    }
+    
+    return coupon;
+  }
+
+  async applyCoupon(subscriptionId, couponCode) {
+    await this.simulateDelay(800);
+    
+    const coupon = await this.validateCoupon(couponCode);
+    const subscription = this.subscriptions.find(sub => sub.id === subscriptionId);
+    
+    if (!subscription) {
+      throw new Error('Subscription not found');
+    }
+    
+    const plan = await this.getPlan(subscription.planId);
+    let discountAmount = 0;
+    
+    if (coupon.discountType === 'percentage') {
+      discountAmount = (plan.amount * coupon.discountValue) / 100;
+    } else if (coupon.discountType === 'fixed') {
+      discountAmount = Math.min(coupon.discountValue, plan.amount);
+    }
+    
+    subscription.appliedCoupon = {
+      id: coupon.id,
+      code: coupon.code,
+      discountAmount,
+      appliedAt: new Date()
+    };
+    
+    coupon.currentUsage++;
+    
+    return {
+      originalAmount: plan.amount,
+      discountAmount,
+      finalAmount: plan.amount - discountAmount,
+      coupon: coupon
+    };
+  }
+
+  // Subscription pause/resume functionality
+  async pauseSubscription(subscriptionId, reason = null) {
+    await this.simulateDelay(1000);
+    
+    const subscription = this.subscriptions.find(sub => sub.id === subscriptionId);
+    if (!subscription) {
+      throw new Error('Subscription not found');
+    }
+    
+    if (subscription.status === 'paused') {
+      throw new Error('Subscription is already paused');
+    }
+    
+    subscription.status = 'paused';
+    subscription.pausedAt = new Date();
+    subscription.pauseReason = reason;
+    subscription.updatedAt = new Date();
+    
+    await this.logSubscriptionEvent('subscription_paused', subscription.id, { reason });
+    
+    return subscription;
+  }
+
+  async resumeSubscription(subscriptionId) {
+    await this.simulateDelay(1000);
+    
+    const subscription = this.subscriptions.find(sub => sub.id === subscriptionId);
+    if (!subscription) {
+      throw new Error('Subscription not found');
+    }
+    
+    if (subscription.status !== 'paused') {
+      throw new Error('Subscription is not paused');
+    }
+    
+    const pausedDuration = new Date() - new Date(subscription.pausedAt);
+    const pausedDays = Math.floor(pausedDuration / (1000 * 60 * 60 * 24));
+    
+    // Extend the current period by the paused duration
+    subscription.currentPeriodEnd = new Date(subscription.currentPeriodEnd.getTime() + pausedDuration);
+    
+    subscription.status = 'active';
+    subscription.resumedAt = new Date();
+    subscription.totalPausedDays = (subscription.totalPausedDays || 0) + pausedDays;
+    subscription.updatedAt = new Date();
+    
+    delete subscription.pausedAt;
+    delete subscription.pauseReason;
+    
+    await this.logSubscriptionEvent('subscription_resumed', subscription.id, { pausedDays });
+    
+    return subscription;
+  }
+
+  // Enhanced analytics
+  async getSubscriptionInsights(subscriptionId) {
+    await this.simulateDelay(800);
+    
+    const subscription = this.subscriptions.find(sub => sub.id === subscriptionId);
+    if (!subscription) {
+      throw new Error('Subscription not found');
+    }
+    
+    const plan = await this.getPlan(subscription.planId);
+    const subscriptionAge = Math.floor((new Date() - new Date(subscription.createdAt)) / (1000 * 60 * 60 * 24));
+    
+    // Calculate usage trends
+    const usageTrends = {
+      patients: this.calculateUsageTrend(subscription, 'patients'),
+      referrals: this.calculateUsageTrend(subscription, 'referrals'),
+      storage: this.calculateUsageTrend(subscription, 'storage'),
+      users: this.calculateUsageTrend(subscription, 'users')
+    };
+    
+    // Calculate cost efficiency
+    const totalSpent = subscription.billingHistory.reduce((total, invoice) => 
+      invoice.status === 'paid' ? total + invoice.amount : total, 0
+    );
+    
+    const valueMetrics = {
+      totalSpent,
+      costPerPatient: subscription.usage.patients > 0 ? totalSpent / subscription.usage.patients : 0,
+      costPerReferral: subscription.usage.referrals > 0 ? totalSpent / subscription.usage.referrals : 0,
+      subscriptionAge,
+      averageMonthlySpend: subscriptionAge > 0 ? totalSpent / (subscriptionAge / 30) : 0
+    };
+    
+    // Feature usage analytics
+    const featureUsage = {
+      mostUsedFeatures: this.getMostUsedFeatures(subscription),
+      underutilizedFeatures: this.getUnderutilizedFeatures(subscription, plan),
+      recommendedActions: this.getRecommendedActions(subscription, plan, usageTrends)
+    };
+    
+    return {
+      subscription,
+      plan,
+      usageTrends,
+      valueMetrics,
+      featureUsage,
+      recommendations: this.generateRecommendations(subscription, plan, usageTrends, valueMetrics)
+    };
+  }
+
+  calculateUsageTrend(subscription, metric) {
+    // Mock implementation - in real app, this would analyze historical data
+    const currentUsage = subscription.usage[metric];
+    const mockHistoricalData = [
+      currentUsage * 0.7,
+      currentUsage * 0.8,
+      currentUsage * 0.9,
+      currentUsage
+    ];
+    
+    const growth = mockHistoricalData.length > 1 ? 
+      ((mockHistoricalData[mockHistoricalData.length - 1] - mockHistoricalData[0]) / mockHistoricalData[0]) * 100 : 0;
+    
+    return {
+      current: currentUsage,
+      historical: mockHistoricalData,
+      growth: growth,
+      trend: growth > 10 ? 'increasing' : growth < -10 ? 'decreasing' : 'stable'
+    };
+  }
+
+  getMostUsedFeatures(subscription) {
+    // Mock implementation
+    return [
+      { feature: 'Patient Management', usage: 85 },
+      { feature: 'Appointment Scheduling', usage: 72 },
+      { feature: 'Billing & Payments', usage: 65 },
+      { feature: 'Clinical Notes', usage: 58 },
+      { feature: 'Reporting', usage: 45 }
+    ];
+  }
+
+  getUnderutilizedFeatures(subscription, plan) {
+    // Mock implementation
+    const allFeatures = plan.features;
+    return [
+      { feature: 'Advanced Analytics', usage: 15 },
+      { feature: 'Custom Integrations', usage: 8 },
+      { feature: 'API Access', usage: 5 }
+    ];
+  }
+
+  getRecommendedActions(subscription, plan, usageTrends) {
+    const recommendations = [];
+    
+    // Check for upgrade opportunities
+    if (usageTrends.patients.trend === 'increasing' && 
+        subscription.usage.patients > plan.limits.patients * 0.8) {
+      recommendations.push({
+        type: 'upgrade',
+        priority: 'high',
+        message: 'Consider upgrading your plan to handle growing patient base'
+      });
+    }
+    
+    // Check for optimization opportunities
+    if (usageTrends.storage.trend === 'increasing' && 
+        subscription.usage.storage > plan.limits.storage * 0.9) {
+      recommendations.push({
+        type: 'optimization',
+        priority: 'medium',
+        message: 'Storage usage is high, consider archiving old data'
+      });
+    }
+    
+    return recommendations;
+  }
+
+  generateRecommendations(subscription, plan, usageTrends, valueMetrics) {
+    const recommendations = [];
+    
+    // Plan recommendations
+    if (valueMetrics.costPerPatient > 50) {
+      recommendations.push({
+        category: 'cost_optimization',
+        title: 'Cost Optimization Opportunity',
+        description: 'Your cost per patient is above average. Consider optimizing your workflow or upgrading to a more cost-effective plan.',
+        priority: 'medium',
+        action: 'review_plan'
+      });
+    }
+    
+    // Usage recommendations
+    if (usageTrends.patients.growth > 20) {
+      recommendations.push({
+        category: 'growth',
+        title: 'Growing Practice Detected',
+        description: 'Your patient base is growing rapidly. Consider upgrading to handle increased capacity.',
+        priority: 'high',
+        action: 'upgrade_plan'
+      });
+    }
+    
+    // Feature recommendations
+    recommendations.push({
+      category: 'features',
+      title: 'Underutilized Features',
+      description: 'You have access to advanced features that could help optimize your practice.',
+      priority: 'low',
+      action: 'explore_features'
+    });
+    
+    return recommendations;
+  }
+
+  // Usage-based billing alerts
+  async checkUsageLimits(subscriptionId) {
+    await this.simulateDelay(500);
+    
+    const subscription = this.subscriptions.find(sub => sub.id === subscriptionId);
+    if (!subscription) {
+      throw new Error('Subscription not found');
+    }
+    
+    const plan = await this.getPlan(subscription.planId);
+    const alerts = [];
+    
+    // Check each usage metric
+    for (const [metric, limit] of Object.entries(plan.limits)) {
+      if (limit > 0) { // -1 means unlimited
+        const usage = subscription.usage[metric];
+        const usagePercent = (usage / limit) * 100;
+        
+        if (usagePercent >= 90) {
+          alerts.push({
+            type: 'critical',
+            metric,
+            usage,
+            limit,
+            percentage: usagePercent,
+            message: `${metric} usage is at ${usagePercent.toFixed(1)}% of limit`
+          });
+        } else if (usagePercent >= 80) {
+          alerts.push({
+            type: 'warning',
+            metric,
+            usage,
+            limit,
+            percentage: usagePercent,
+            message: `${metric} usage is at ${usagePercent.toFixed(1)}% of limit`
+          });
+        }
+      }
+    }
+    
+    return alerts;
+  }
+
+  // Subscription comparison
+  async compareSubscriptions(subscriptionIds) {
+    await this.simulateDelay(1000);
+    
+    const subscriptions = this.subscriptions.filter(sub => 
+      subscriptionIds.includes(sub.id)
+    );
+    
+    const comparison = {
+      subscriptions: [],
+      metrics: {
+        totalSpent: 0,
+        totalPatients: 0,
+        totalReferrals: 0,
+        averageMonthlySpend: 0
+      }
+    };
+    
+    for (const subscription of subscriptions) {
+      const plan = await this.getPlan(subscription.planId);
+      const totalSpent = subscription.billingHistory.reduce((total, invoice) => 
+        invoice.status === 'paid' ? total + invoice.amount : total, 0
+      );
+      
+      const subscriptionData = {
+        id: subscription.id,
+        planName: plan.displayName,
+        status: subscription.status,
+        usage: subscription.usage,
+        totalSpent,
+        subscriptionAge: Math.floor((new Date() - new Date(subscription.createdAt)) / (1000 * 60 * 60 * 24))
+      };
+      
+      comparison.subscriptions.push(subscriptionData);
+      comparison.metrics.totalSpent += totalSpent;
+      comparison.metrics.totalPatients += subscription.usage.patients;
+      comparison.metrics.totalReferrals += subscription.usage.referrals;
+    }
+    
+    comparison.metrics.averageMonthlySpend = comparison.metrics.totalSpent / subscriptions.length;
+    
+    return comparison;
+  }
+
+  // Initialize coupons for demo
+  initializeCoupons() {
+    this.coupons = [
+      {
+        id: 'coupon_001',
+        code: 'WELCOME20',
+        discountType: 'percentage',
+        discountValue: 20,
+        expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+        usageLimit: 100,
+        currentUsage: 15,
+        active: true,
+        createdAt: new Date()
+      },
+      {
+        id: 'coupon_002',
+        code: 'SAVE50',
+        discountType: 'fixed',
+        discountValue: 50,
+        expiryDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // 60 days from now
+        usageLimit: 50,
+        currentUsage: 8,
+        active: true,
+        createdAt: new Date()
+      }
+    ];
   }
 }
 

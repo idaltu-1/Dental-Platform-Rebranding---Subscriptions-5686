@@ -1,13 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { subscriptionService } from '../services/SubscriptionService';
 
-function ProtectedRoute({ children, requiredRole = null, requiredPermission = null }) {
+function ProtectedRoute({ children, requiredRole = null, requiredPermission = null, requiredPlan = null }) {
   const { user, isAuthenticated, loading } = useAuth();
+  const [planId, setPlanId] = useState(null);
+  const [planLoading, setPlanLoading] = useState(false);
   const location = useLocation();
 
+  useEffect(() => {
+    async function fetchPlan() {
+      if (requiredPlan && user) {
+        setPlanLoading(true);
+        try {
+          const sub = await subscriptionService.getSubscription(user.id);
+          setPlanId(sub?.planId || null);
+        } finally {
+          setPlanLoading(false);
+        }
+      }
+    }
+    fetchPlan();
+  }, [requiredPlan, user]);
+
   // Show loading spinner while checking authentication
-  if (loading) {
+  if (loading || planLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
         <div className="text-center">
@@ -36,10 +54,19 @@ function ProtectedRoute({ children, requiredRole = null, requiredPermission = nu
 
   // Check permission-based access
   if (requiredPermission) {
-    const hasPermission = user.permissions?.includes('all') || 
+    const hasPermission = user.permissions?.includes('all') ||
                          user.permissions?.includes(requiredPermission);
-    
+
     if (!hasPermission) {
+      return <Navigate to="/unauthorized" replace />;
+    }
+  }
+
+  // Check subscription plan level
+  if (requiredPlan) {
+    const userLevel = subscriptionService.getPlanLevel(planId);
+    const requiredLevel = subscriptionService.getPlanLevel(requiredPlan);
+    if (userLevel < requiredLevel) {
       return <Navigate to="/unauthorized" replace />;
     }
   }

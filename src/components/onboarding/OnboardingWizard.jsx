@@ -414,9 +414,9 @@ function OnboardingWizard() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Welcome to refer.dental
           </h1>
-          <p className="text-gray-600">
-            Let's set up your account in just a few steps
-          </p>
+            <p className="text-gray-600">
+              Let&apos;s set up your account in just a few steps
+            </p>
         </motion.div>
 
         {/* Progress Steps */}

@@ -6,8 +6,9 @@ import SafeIcon from '../common/SafeIcon';
 import toast from 'react-hot-toast';
 
 const {
-  FiSearch, FiPlus, FiEdit, FiTrash2, FiPhone, FiMail, FiCalendar, 
-  FiEye, FiX, FiUser, FiMapPin, FiCreditCard, FiSave, FiUserPlus
+  FiSearch, FiPlus, FiEdit, FiTrash2, FiPhone, FiMail, FiCalendar,
+  FiEye, FiX, FiUser, FiMapPin, FiCreditCard, FiSave, FiUserPlus,
+  FiUsers
 } = FiIcons;
 
 function PatientManagement() {
@@ -184,7 +185,7 @@ function PatientManagement() {
   };
 
   const handleScheduleAppointment = (patient) => {
-    navigate('/schedule', { state: { patientId: patient.id, patientName: patient.name } });
+    navigate('schedule', { state: { patientId: patient.id, patientName: patient.name } });
   };
 
   return (

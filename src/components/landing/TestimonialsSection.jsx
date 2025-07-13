@@ -91,9 +91,9 @@ function TestimonialsSection() {
               </div>
 
               {/* Quote */}
-              <blockquote className="text-gray-700 mb-6 text-lg leading-relaxed">
-                "{testimonial.quote}"
-              </blockquote>
+                <blockquote className="text-gray-700 mb-6 text-lg leading-relaxed">
+                  &ldquo;{testimonial.quote}&rdquo;
+                </blockquote>
 
               {/* Metrics */}
               <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-white rounded-lg">

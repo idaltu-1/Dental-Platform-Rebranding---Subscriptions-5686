@@ -434,7 +434,7 @@ function Analytics() {
       >
         <h3 className="text-2xl font-bold mb-4">Ready to Optimize Your Practice?</h3>
         <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-          Based on your analytics, we've identified key opportunities to increase revenue and improve patient satisfaction.
+          {"Based on your analytics, we've identified key opportunities to increase revenue and improve patient satisfaction."}
         </p>
         <div className="flex justify-center space-x-4">
           <button className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">

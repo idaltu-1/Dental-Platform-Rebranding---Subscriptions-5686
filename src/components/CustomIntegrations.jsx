@@ -387,9 +387,9 @@ function CustomIntegrations() {
         className="mt-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-center text-white"
       >
         <h3 className="text-2xl font-bold mb-4">Need a Custom Integration?</h3>
-        <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-          Can't find the integration you need? Our team can build custom connections to any API or service.
-        </p>
+          <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
+            Can&apos;t find the integration you need? Our team can build custom connections to any API or service.
+          </p>
         <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
           Contact Our Team
         </button>
